@@ -78,15 +78,15 @@ export function CheckinScanner({ eventId, tokenPublico }: { eventId: string; tok
   return (
     <div className="flex flex-col items-center gap-4">
       <div id="qr-reader" className="w-full max-w-sm overflow-hidden rounded-xl" />
-      {!scanning && !resultado && <p className="text-neutral-500">Iniciando câmera...</p>}
+      {!scanning && !resultado && <p className="text-[var(--text-muted)]">Iniciando câmera...</p>}
       {resultado && (
-        <Card className={resultado.ok ? "border-emerald-300 bg-emerald-50" : "border-red-300 bg-red-50"}>
+        <Card className={resultado.ok ? "border-[var(--success)]/40 bg-[var(--success)]/10" : "border-[var(--error)]/40 bg-[var(--error)]/10"}>
           <CardContent className="p-4 text-center">
-            <p className={`text-lg font-bold ${resultado.ok ? "text-emerald-800" : "text-red-800"}`}>
+            <p className={`text-lg font-bold ${resultado.ok ? "text-[var(--success)]" : "text-[var(--error)]"}`}>
               {resultado.ok ? "✔ Acesso liberado" : "✖ Não validado"}
             </p>
-            <p className="mt-1 text-sm text-neutral-700">{resultado.mensagem}</p>
-            {resultado.nomeLote && <p className="mt-1 text-sm text-neutral-500">{resultado.nomeLote}</p>}
+            <p className="mt-1 text-sm text-[var(--text-muted-2)]">{resultado.mensagem}</p>
+            {resultado.nomeLote && <p className="mt-1 text-sm text-[var(--text-muted)]">{resultado.nomeLote}</p>}
           </CardContent>
         </Card>
       )}

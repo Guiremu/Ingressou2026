@@ -25,7 +25,7 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900">Ingressos — {event.titulo}</h1>
+        <h1 className="text-2xl font-bold text-white">Ingressos — {event.titulo}</h1>
         <a href={`/produtor/eventos/${event.id}/ingressos/export`}>
           <Button variant="outline">Exportar CSV</Button>
         </a>
@@ -39,23 +39,23 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
             <Card key={t.id}>
               <CardContent className="flex items-center justify-between p-3 text-sm">
                 <div>
-                  <p className="font-medium text-neutral-900">
+                  <p className="font-medium text-white">
                     {order?.comprador_nome ?? "Cortesia"} {t.is_cortesia && <Badge variant="secondary">cortesia</Badge>}
                   </p>
-                  <p className="text-neutral-500">
+                  <p className="text-[var(--text-muted)]">
                     {tipo?.nome} — {order?.comprador_email ?? "—"}
                   </p>
-                  <p className="text-xs text-neutral-400">{t.codigo_qr}</p>
+                  <p className="text-xs text-[var(--text-dim)]">{t.codigo_qr}</p>
                 </div>
                 <div className="text-right">
                   <Badge variant={statusVariant[t.status as keyof typeof statusVariant]}>{t.status}</Badge>
-                  {t.usado_em && <p className="mt-1 text-xs text-neutral-400">{formatDate(t.usado_em)}</p>}
+                  {t.usado_em && <p className="mt-1 text-xs text-[var(--text-dim)]">{formatDate(t.usado_em)}</p>}
                 </div>
               </CardContent>
             </Card>
           );
         })}
-        {(!tickets || tickets.length === 0) && <p className="text-neutral-500">Nenhum ingresso emitido ainda.</p>}
+        {(!tickets || tickets.length === 0) && <p className="text-[var(--text-muted)]">Nenhum ingresso emitido ainda.</p>}
       </div>
     </div>
   );

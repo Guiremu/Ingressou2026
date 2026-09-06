@@ -36,8 +36,8 @@ export default async function ValidarPage({
 
   return (
     <div className="flex flex-1 flex-col items-center gap-4 px-4 py-8">
-      <h1 className="text-xl font-bold text-neutral-900">Check-in — {event.titulo}</h1>
-      <p className="text-sm text-neutral-500">Portaria: {validator.nome_identificacao}</p>
+      <h1 className="text-xl font-bold text-white">Check-in — {event.titulo}</h1>
+      <p className="text-sm text-[var(--text-muted)]">Portaria: {validator.nome_identificacao}</p>
       <CheckinScanner eventId={event.id} tokenPublico={token} />
     </div>
   );

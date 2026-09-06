@@ -52,6 +52,9 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
       })
     : null;
 
+  const codigoCurto = ticket.codigo_qr.replace(/-/g, "").slice(0, 8).toUpperCase();
+  const codigoFormatado = `${codigoCurto.slice(0, 4)}-${codigoCurto.slice(4)}`;
+
   return (
     <div className="flex flex-1 flex-col">
       <SiteHeader />
@@ -61,28 +64,34 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
             <Badge variant={statusVariant[ticket.status as keyof typeof statusVariant]}>
               {statusLabel[ticket.status as keyof typeof statusLabel]}
             </Badge>
-            <h1 className="text-xl font-bold text-neutral-900">{event?.titulo}</h1>
-            <p className="text-sm text-neutral-500">{loteNome}</p>
+            <h1 className="font-[var(--font-sora)] text-xl font-extrabold tracking-tight text-white">
+              {event?.titulo}
+            </h1>
+            <p className="text-sm text-[var(--text-muted)]">{loteNome}</p>
             {event && (
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 {formatDate(event.data_inicio)} — {event.local}, {event.cidade}
               </p>
             )}
-            <p className="text-sm text-neutral-500">Titular: {compradorNome}</p>
+            <p className="text-sm text-[var(--text-muted)]">Titular: {compradorNome}</p>
+
+            <p className="font-[var(--font-sora)] text-[15px] font-bold tracking-[0.14em] text-white">
+              {codigoFormatado}
+            </p>
 
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrDataUrl} alt="QR Code do ingresso" className="h-64 w-64" />
+            <img src={qrDataUrl} alt="QR Code do ingresso" className="h-64 w-64 rounded-xl bg-white p-2" />
 
             {walletUrl && (
               <a
                 href={walletUrl}
-                className="inline-flex h-10 items-center justify-center rounded-lg bg-black px-4 text-sm font-medium text-white"
+                className="inline-flex h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-bold text-white"
               >
                 Salvar no Google Wallet
               </a>
             )}
 
-            <div className="mt-2 rounded-lg bg-amber-50 p-3 text-left text-xs text-amber-800">
+            <div className="mt-2 rounded-xl bg-[var(--warning)]/10 p-3 text-left text-xs text-[var(--warning)]">
               <strong>Proteja seu ingresso:</strong> não compartilhe este link nem prints do QR Code
               com outras pessoas. Quem apresentar o QR Code primeiro na portaria valida o acesso —
               o ingresso não pode ser usado duas vezes.

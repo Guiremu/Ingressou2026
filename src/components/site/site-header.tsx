@@ -6,9 +6,12 @@ export async function SiteHeader() {
   const profile = await getCurrentProfile();
 
   return (
-    <header className="border-b border-neutral-200 bg-white">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[#07070b]/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-xl font-bold tracking-tight text-neutral-900">
+        <Link
+          href="/"
+          className="font-[var(--font-sora)] text-lg font-extrabold tracking-tight text-white"
+        >
           ingressou
         </Link>
         <nav className="flex items-center gap-3">

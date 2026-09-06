@@ -12,7 +12,7 @@ export function LoteForm({ eventId }: { eventId: string }) {
   const [state, formAction, pending] = useActionState(criarLote, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-dashed border-neutral-300 p-4">
+    <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-dashed border-[var(--border-2)] p-4">
       <input type="hidden" name="event_id" value={eventId} />
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
@@ -44,7 +44,7 @@ export function LoteForm({ eventId }: { eventId: string }) {
           <Input id="lote_fim" name="data_fim_venda" type="datetime-local" />
         </div>
       </div>
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
       <Button type="submit" size="sm" disabled={pending} className="self-start">
         {pending ? "Salvando..." : "Adicionar lote"}
       </Button>

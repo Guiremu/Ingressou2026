@@ -26,7 +26,7 @@ export default async function EventosPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900">Eventos</h1>
+        <h1 className="text-2xl font-bold text-white">Eventos</h1>
         <Link href="/produtor/eventos/novo">
           <Button>Novo evento</Button>
         </Link>
@@ -34,15 +34,15 @@ export default async function EventosPage() {
 
       <div className="flex flex-col gap-3">
         {(!events || events.length === 0) && (
-          <p className="text-neutral-500">Nenhum evento criado ainda.</p>
+          <p className="text-[var(--text-muted)]">Nenhum evento criado ainda.</p>
         )}
         {events?.map((event) => (
           <Link key={event.id} href={`/produtor/eventos/${event.id}`}>
             <Card className="transition-shadow hover:shadow-md">
               <CardContent className="flex items-center justify-between p-4">
                 <div>
-                  <p className="font-semibold text-neutral-900">{event.titulo}</p>
-                  <p className="text-sm text-neutral-500">
+                  <p className="font-semibold text-white">{event.titulo}</p>
+                  <p className="text-sm text-[var(--text-muted)]">
                     {formatDate(event.data_inicio)} — {event.cidade}
                   </p>
                 </div>

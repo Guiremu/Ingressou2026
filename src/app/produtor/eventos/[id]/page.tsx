@@ -38,8 +38,8 @@ export default async function EventoPage({ params }: { params: Promise<{ id: str
     <div className="flex flex-col gap-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">{event.titulo}</h1>
-          <p className="text-neutral-500">
+          <h1 className="text-2xl font-bold text-white">{event.titulo}</h1>
+          <p className="text-[var(--text-muted)]">
             {formatDate(event.data_inicio)} — {event.cidade}
           </p>
           <Badge variant="secondary" className="mt-2">
@@ -50,13 +50,13 @@ export default async function EventoPage({ params }: { params: Promise<{ id: str
           <StatusActions eventId={event.id} status={event.status} />
           <Link
             href={`/produtor/eventos/${event.id}/checkin`}
-            className="text-sm font-medium text-neutral-700 underline"
+            className="text-sm font-medium text-[var(--text-muted-2)] underline"
           >
             Abrir check-in (câmera)
           </Link>
           <Link
             href={`/produtor/eventos/${event.id}/ingressos`}
-            className="text-sm font-medium text-neutral-700 underline"
+            className="text-sm font-medium text-[var(--text-muted-2)] underline"
           >
             Ver / exportar ingressos
           </Link>
@@ -73,13 +73,13 @@ export default async function EventoPage({ params }: { params: Promise<{ id: str
             .map((tt) => (
               <div
                 key={tt.id}
-                className="flex items-center justify-between rounded-lg border border-neutral-200 p-3"
+                className="flex items-center justify-between rounded-lg border border-[var(--border)] p-3"
               >
                 <div>
-                  <p className="font-medium text-neutral-900">{tt.nome}</p>
-                  <p className="text-sm text-neutral-500">{formatCurrency(Number(tt.preco))}</p>
+                  <p className="font-medium text-white">{tt.nome}</p>
+                  <p className="text-sm text-[var(--text-muted)]">{formatCurrency(Number(tt.preco))}</p>
                 </div>
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-[var(--text-muted)]">
                   {tt.quantidade_vendida} / {tt.quantidade_total} vendidos
                 </p>
               </div>
@@ -105,11 +105,11 @@ export default async function EventoPage({ params }: { params: Promise<{ id: str
           {validators?.map((v) => (
             <div
               key={v.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-neutral-200 p-3"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border)] p-3"
             >
               <div>
-                <p className="font-medium text-neutral-900">{v.nome_identificacao}</p>
-                <p className="break-all text-xs text-neutral-500">
+                <p className="font-medium text-white">{v.nome_identificacao}</p>
+                <p className="break-all text-xs text-[var(--text-muted)]">
                   {siteUrl}/validar/{event.slug}?token={v.token_publico}
                 </p>
               </div>

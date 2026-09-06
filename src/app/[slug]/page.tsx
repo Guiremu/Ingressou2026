@@ -32,20 +32,20 @@ export default async function ProducerPage({ params }: { params: Promise<{ slug:
         <div className="flex items-center gap-4">
           {producer.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={producer.logo_url} alt={nome} className="h-16 w-16 rounded-full object-cover" />
+            <img src={producer.logo_url} alt={nome} className="h-16 w-16 rounded-2xl object-cover" />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-200 text-xl font-bold text-neutral-500">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--surface-3)] font-[var(--font-sora)] text-2xl font-extrabold text-[var(--accent)]">
               {nome.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900">{nome}</h1>
-            <p className="text-neutral-500">Eventos deste produtor</p>
+            <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">{nome}</h1>
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-dim)]">Eventos deste produtor</p>
           </div>
         </div>
 
         {!events || events.length === 0 ? (
-          <p className="mt-16 text-center text-neutral-500">Nenhum evento publicado no momento.</p>
+          <p className="mt-16 text-center text-[var(--text-muted)]">Nenhum evento publicado no momento.</p>
         ) : (
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (

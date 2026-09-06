@@ -17,13 +17,13 @@ export default async function ContaPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-neutral-900">Conta e Mercado Pago</h1>
+      <h1 className="text-2xl font-bold text-white">Conta e Mercado Pago</h1>
 
       <Card>
         <CardHeader>
           <CardTitle>Dados cadastrais</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-1 text-sm text-neutral-700">
+        <CardContent className="flex flex-col gap-1 text-sm text-[var(--text-muted-2)]">
           <p>Razão social: {producer.razao_social}</p>
           <p>{producer.tipo_pessoa === "juridica" ? `CNPJ: ${producer.cnpj}` : "Pessoa física"}</p>
           <p>CPF do responsável: {producer.cpf}</p>
@@ -46,7 +46,7 @@ export default async function ContaPage() {
           {conectado ? (
             <Badge variant="success">Conta conectada</Badge>
           ) : producer.status !== "aprovado" ? (
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-[var(--text-muted)]">
               Aguarde a aprovação do seu cadastro para conectar sua conta do Mercado Pago.
             </p>
           ) : oauthUrl ? (
@@ -54,7 +54,7 @@ export default async function ContaPage() {
               <Button>Conectar conta do Mercado Pago</Button>
             </a>
           ) : (
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-[var(--text-muted)]">
               Integração com o Mercado Pago ainda não configurada na plataforma.
             </p>
           )}

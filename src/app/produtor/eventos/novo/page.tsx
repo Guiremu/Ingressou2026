@@ -57,7 +57,7 @@ export default function NovoEventoPage() {
             </div>
           </div>
 
-          {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+          {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
 
           <Button type="submit" disabled={pending} className="mt-2">
             {pending ? "Criando..." : "Criar evento (rascunho)"}

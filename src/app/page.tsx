@@ -53,15 +53,17 @@ export default async function VitrinePage({
     <div className="flex flex-1 flex-col">
       <SiteHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Eventos na sua região</h1>
-        <p className="mt-1 text-neutral-500">Encontre e compre ingressos de todos os produtores.</p>
+        <h1 className="font-[var(--font-sora)] text-[34px] font-extrabold leading-[1.05] tracking-tight text-white">
+          O que rola<br />na sua região
+        </h1>
+        <p className="mt-2 text-[var(--text-muted)]">Encontre e compre ingressos de todos os produtores.</p>
 
         <div className="mt-6">
           <EventFilters categorias={categorias} cidades={cidades} />
         </div>
 
         {rows.length === 0 ? (
-          <p className="mt-16 text-center text-neutral-500">Nenhum evento encontrado.</p>
+          <p className="mt-16 text-center text-[var(--text-muted)]">Nenhum evento encontrado.</p>
         ) : (
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((event) =>

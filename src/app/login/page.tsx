@@ -30,20 +30,20 @@ export default function LoginPage() {
               <Label htmlFor="password">Senha</Label>
               <Input id="password" name="password" type="password" required autoComplete="current-password" />
             </div>
-            {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+            {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
             <Button type="submit" disabled={pending} className="mt-2">
               {pending ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <p className="mt-6 text-center text-sm text-neutral-500">
+          <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
             Ainda não tem conta?{" "}
-            <Link href="/cadastro" className="font-medium text-neutral-900 underline">
+            <Link href="/cadastro" className="font-medium text-white underline">
               Cadastre-se
             </Link>
           </p>
-          <p className="mt-2 text-center text-sm text-neutral-500">
+          <p className="mt-2 text-center text-sm text-[var(--text-muted)]">
             É organizador de eventos?{" "}
-            <Link href="/cadastro/produtor" className="font-medium text-neutral-900 underline">
+            <Link href="/cadastro/produtor" className="font-medium text-white underline">
               Cadastre-se como produtor
             </Link>
           </p>

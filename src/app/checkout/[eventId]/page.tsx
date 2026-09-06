@@ -42,10 +42,14 @@ export default async function CheckoutPage({
     <div className="flex flex-1 flex-col">
       <SiteHeader />
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Finalizar compra</h1>
-        <p className="mt-1 text-neutral-500">{event.titulo}</p>
-        <p className="mt-4 rounded-lg bg-neutral-100 p-3 text-sm text-neutral-700">
-          {ticketType.nome} — {formatCurrency(Number(ticketType.preco))} por unidade
+        <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">
+          Finalizar compra
+        </h1>
+        <p className="mt-1 text-[var(--text-muted)]">{event.titulo}</p>
+        <p className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm text-[var(--text-muted-2)]">
+          {ticketType.nome} —{" "}
+          <span className="font-bold text-[var(--accent)]">{formatCurrency(Number(ticketType.preco))}</span> por
+          unidade
         </p>
 
         <CheckoutForm

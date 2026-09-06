@@ -47,7 +47,7 @@ export default async function EventPage({
     <div className="flex flex-1 flex-col">
       <SiteHeader />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
-        <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-neutral-200">
+        <div className="aspect-[16/9] w-full overflow-hidden rounded-2xl bg-[var(--surface-4)]">
           {event.imagem_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={event.imagem_url} alt={event.titulo} className="h-full w-full object-cover" />
@@ -56,30 +56,34 @@ export default async function EventPage({
 
         <div className="mt-6 flex flex-col gap-2">
           {event.categoria && <Badge variant="secondary">{event.categoria}</Badge>}
-          <h1 className="text-3xl font-bold text-neutral-900">{event.titulo}</h1>
-          <p className="text-neutral-500">
+          <h1 className="font-[var(--font-sora)] text-[32px] font-extrabold leading-tight tracking-tight text-white">
+            {event.titulo}
+          </h1>
+          <p className="text-[var(--text-muted)]">
             {formatDate(event.data_inicio)}
             {event.data_fim ? ` até ${formatDate(event.data_fim)}` : ""}
           </p>
-          <p className="text-neutral-500">
+          <p className="text-[var(--text-muted)]">
             {event.local} — {event.endereco}, {event.cidade}
           </p>
-          <Link
-            href={`/${producer.slug}`}
-            className="text-sm font-medium text-neutral-700 underline"
-          >
+          <Link href={`/${producer.slug}`} className="text-sm font-medium text-[var(--accent)] underline">
             por {nome}
           </Link>
         </div>
 
         {event.descricao && (
-          <p className="mt-6 whitespace-pre-line text-neutral-700">{event.descricao}</p>
+          <>
+            <h2 className="mt-8 font-[var(--font-sora)] text-base font-bold text-white">Sobre o evento</h2>
+            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--text-muted-2)]">
+              {event.descricao}
+            </p>
+          </>
         )}
 
-        <h2 className="mt-10 text-xl font-bold text-neutral-900">Ingressos</h2>
+        <h2 className="mt-10 font-[var(--font-sora)] text-lg font-bold text-white">Ingressos</h2>
         <div className="mt-4 flex flex-col gap-3">
           {!ticketTypes || ticketTypes.length === 0 ? (
-            <p className="text-neutral-500">Nenhum lote disponível no momento.</p>
+            <p className="text-[var(--text-muted)]">Nenhum lote disponível no momento.</p>
           ) : (
             ticketTypes.map((tt) => {
               const esgotado = tt.quantidade_vendida >= tt.quantidade_total;
@@ -87,8 +91,10 @@ export default async function EventPage({
                 <Card key={tt.id}>
                   <CardContent className="flex items-center justify-between p-4">
                     <div>
-                      <p className="font-semibold text-neutral-900">{tt.nome}</p>
-                      <p className="text-sm text-neutral-500">{formatCurrency(Number(tt.preco))}</p>
+                      <p className="font-semibold text-white">{tt.nome}</p>
+                      <p className="text-sm font-bold text-[var(--accent)]">
+                        {formatCurrency(Number(tt.preco))}
+                      </p>
                     </div>
                     <Link href={`/checkout/${event.id}?lote=${tt.id}`}>
                       <Button disabled={esgotado} variant={esgotado ? "outline" : "default"}>

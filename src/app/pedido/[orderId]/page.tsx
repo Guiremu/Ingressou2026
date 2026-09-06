@@ -32,20 +32,22 @@ export default async function PedidoPage({ params }: { params: Promise<{ orderId
     <div className="flex flex-1 flex-col">
       <SiteHeader />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Pedido de {order.comprador_nome}</h1>
-        <p className="mt-1 text-neutral-500">{eventTitulo}</p>
-        <p className="mt-1 text-sm text-neutral-500">
-          Total: {formatCurrency(Number(order.valor_total_cobrado))}
+        <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">
+          Pedido de {order.comprador_nome}
+        </h1>
+        <p className="mt-1 text-[var(--text-muted)]">{eventTitulo}</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Total: <span className="font-bold text-[var(--accent)]">{formatCurrency(Number(order.valor_total_cobrado))}</span>
         </p>
 
         {order.status === "pendente" && (
-          <p className="mt-6 rounded-lg bg-amber-50 p-4 text-sm text-amber-800">
+          <p className="mt-6 rounded-xl bg-[var(--warning)]/10 p-4 text-sm text-[var(--warning)]">
             Pagamento ainda não confirmado. Atualize esta página após pagar.
           </p>
         )}
 
         {order.status === "cancelado" && (
-          <p className="mt-6 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+          <p className="mt-6 rounded-xl bg-[var(--error)]/10 p-4 text-sm text-[var(--error)]">
             Este pedido foi cancelado.
           </p>
         )}
@@ -56,14 +58,14 @@ export default async function PedidoPage({ params }: { params: Promise<{ orderId
               <Card key={t.id}>
                 <CardContent className="flex items-center justify-between p-4">
                   <div>
-                    <p className="font-medium text-neutral-900">
+                    <p className="font-medium text-white">
                       {(t.ticket_types as unknown as { nome: string } | null)?.nome}
                     </p>
                     <Badge variant={statusVariant[t.status as keyof typeof statusVariant]}>
                       {statusLabel[t.status as keyof typeof statusLabel]}
                     </Badge>
                   </div>
-                  <Link href={`/ingresso/${t.codigo_qr}`} className="font-medium text-neutral-900 underline">
+                  <Link href={`/ingresso/${t.codigo_qr}`} className="font-medium text-[var(--accent)] underline">
                     Ver ingresso
                   </Link>
                 </CardContent>

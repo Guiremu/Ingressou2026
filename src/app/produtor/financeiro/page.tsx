@@ -33,12 +33,12 @@ export default async function FinanceiroPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-neutral-900">Financeiro</h1>
+      <h1 className="text-2xl font-bold text-white">Financeiro</h1>
 
       <Card>
         <CardContent className="p-5">
-          <p className="text-sm text-neutral-500">Saldo líquido acumulado</p>
-          <p className="text-3xl font-bold text-neutral-900">{formatCurrency(totalLiquido)}</p>
+          <p className="text-sm text-[var(--text-muted)]">Saldo líquido acumulado</p>
+          <p className="text-3xl font-bold text-white">{formatCurrency(totalLiquido)}</p>
         </CardContent>
       </Card>
 
@@ -49,11 +49,11 @@ export default async function FinanceiroPage() {
             <Card key={o.id}>
               <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
                 <div>
-                  <p className="font-medium text-neutral-900">{o.comprador_nome}</p>
-                  <p className="text-neutral-500">
+                  <p className="font-medium text-white">{o.comprador_nome}</p>
+                  <p className="text-[var(--text-muted)]">
                     {eventTitulo.get(o.event_id)} — {formatDate(o.criado_em)}
                   </p>
-                  <p className="text-neutral-500">
+                  <p className="text-[var(--text-muted)]">
                     {o.metodo_pagamento} {o.parcelas > 1 ? `${o.parcelas}x` : "à vista"}
                   </p>
                 </div>
@@ -61,11 +61,11 @@ export default async function FinanceiroPage() {
                   <Badge variant={o.status === "pago" ? "success" : o.status === "pendente" ? "warning" : "destructive"}>
                     {o.status}
                   </Badge>
-                  <p className="mt-1 font-medium text-neutral-900">
+                  <p className="mt-1 font-medium text-white">
                     {formatCurrency(Number(o.valor_total_cobrado))}
                   </p>
                   {split && (
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-[var(--text-muted)]">
                       líquido: {formatCurrency(Number(split.valor_liquido_produtor))}
                     </p>
                   )}
@@ -74,7 +74,7 @@ export default async function FinanceiroPage() {
             </Card>
           );
         })}
-        {(!orders || orders.length === 0) && <p className="text-neutral-500">Nenhuma venda ainda.</p>}
+        {(!orders || orders.length === 0) && <p className="text-[var(--text-muted)]">Nenhuma venda ainda.</p>}
       </div>
     </div>
   );

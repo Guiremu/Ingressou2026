@@ -20,7 +20,7 @@ export default async function TaxasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-neutral-900">Taxas</h1>
+      <h1 className="text-2xl font-bold text-white">Taxas</h1>
 
       <Card>
         <CardHeader>

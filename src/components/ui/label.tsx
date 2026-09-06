@@ -3,6 +3,12 @@ import * as React from "react";
 
 export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return (
-    <label className={cn("text-sm font-medium text-neutral-800", className)} {...props} />
+    <label
+      className={cn(
+        "text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]",
+        className,
+      )}
+      {...props}
+    />
   );
 }

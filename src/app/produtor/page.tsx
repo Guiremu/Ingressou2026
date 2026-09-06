@@ -54,7 +54,12 @@ export default async function ProdutorDashboard() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900">Dashboard</h1>
+        <div>
+          <h1 className="font-[var(--font-sora)] text-[19px] font-bold tracking-tight text-white">
+            Visão geral
+          </h1>
+          <p className="text-xs text-[var(--text-muted)]">{producer.nome_fantasia ?? producer.razao_social}</p>
+        </div>
         <Link href="/produtor/eventos/novo">
           <Button>Novo evento</Button>
         </Link>
@@ -63,41 +68,49 @@ export default async function ProdutorDashboard() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-neutral-500">Vendido (bruto)</CardTitle>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              Vendido (bruto)
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-neutral-900">
+          <CardContent className="font-[var(--font-sora)] text-[21px] font-bold text-white">
             {formatCurrency(totalVendido)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-neutral-500">Seu saldo líquido</CardTitle>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              Seu saldo líquido
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-neutral-900">
+          <CardContent className="font-[var(--font-sora)] text-[21px] font-bold text-[var(--accent)]">
             {formatCurrency(saldoLiquido)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-neutral-500">Ingressos vendidos</CardTitle>
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              Ingressos vendidos
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-bold text-neutral-900">{ingressosVendidos}</CardContent>
+          <CardContent className="font-[var(--font-sora)] text-[21px] font-bold text-white">
+            {ingressosVendidos}
+          </CardContent>
         </Card>
       </div>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold text-neutral-900">Seus eventos</h2>
+        <h2 className="mb-3 font-[var(--font-sora)] text-base font-bold text-white">Seus eventos</h2>
         <div className="flex flex-col gap-3">
           {(!events || events.length === 0) && (
-            <p className="text-neutral-500">Você ainda não criou nenhum evento.</p>
+            <p className="text-[var(--text-muted)]">Você ainda não criou nenhum evento.</p>
           )}
           {events?.map((event) => (
             <Link key={event.id} href={`/produtor/eventos/${event.id}`}>
-              <Card className="transition-shadow hover:shadow-md">
+              <Card className="transition-colors hover:border-[var(--border-2)]">
                 <CardContent className="flex items-center justify-between p-4">
                   <div>
-                    <p className="font-semibold text-neutral-900">{event.titulo}</p>
-                    <p className="text-sm text-neutral-500">{formatDate(event.data_inicio)}</p>
+                    <p className="font-semibold text-white">{event.titulo}</p>
+                    <p className="text-sm text-[var(--text-muted)]">{formatDate(event.data_inicio)}</p>
                   </div>
                   <Badge variant={eventStatusVariant[event.status as keyof typeof eventStatusVariant]}>
                     {event.status}

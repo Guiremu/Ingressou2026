@@ -1,18 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
+  /* superfícies */
+  --bg: #07070b;
+  --surface: #16161f;
+  --surface-2: #18202e;
+  --surface-3: #1d1d28;
+  --surface-4: #121722;
+  --border: #23232f;
+  --border-2: #2e2e3d;
+
+  /* texto */
+  --text: #ffffff;
+  --text-muted: #93a0b8;
+  --text-muted-2: #a2a2b4;
+  --text-dim: #6e6e82;
+
+  /* acentos */
+  --accent: #d3ff4a;
+  --accent-foreground: #07070b;
+  --purple: #7c5cff;
+  --purple-deep: #2a1b66;
+  --pink: #ff4d8d;
+  --pink-soft: #ff9ec4;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+
+  --background: var(--bg);
+  --foreground: var(--text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-archivo);
+  --font-display: var(--font-sora);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sora), sans-serif;
+  letter-spacing: -0.02em;
 }

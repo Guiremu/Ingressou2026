@@ -13,14 +13,17 @@ export default async function ProdutorLayout({ children }: { children: React.Rea
   const { producer } = await requireProducer();
 
   return (
-    <div className="flex flex-1 flex-col bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="flex flex-1 flex-col bg-[#07070b]">
+      <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[#07070b]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/produtor" className="text-xl font-bold tracking-tight text-neutral-900">
-            ingressou <span className="font-normal text-neutral-400">produtor</span>
+          <Link
+            href="/produtor"
+            className="font-[var(--font-sora)] text-base font-extrabold tracking-tight text-white"
+          >
+            ingressou <span className="font-medium text-[var(--text-dim)]">produtor</span>
           </Link>
           <form action="/logout" method="post">
-            <button type="submit" className="text-sm font-medium text-neutral-500 hover:text-neutral-900">
+            <button type="submit" className="text-sm font-medium text-[var(--text-muted)] hover:text-white">
               Sair
             </button>
           </form>
@@ -30,7 +33,7 @@ export default async function ProdutorLayout({ children }: { children: React.Rea
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-white"
             >
               {item.label}
             </Link>
@@ -40,14 +43,14 @@ export default async function ProdutorLayout({ children }: { children: React.Rea
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         {producer.status === "pendente" && (
-          <div className="mb-6 rounded-lg bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="mb-6 rounded-xl bg-[var(--warning)]/10 p-4 text-sm text-[var(--warning)]">
             Seu cadastro está <Badge variant="warning">pendente</Badge> de aprovação do Gestor ADM.
             Você já pode criar eventos como rascunho, mas não poderá publicá-los nem receber
             pagamentos até ser aprovado.
           </div>
         )}
         {producer.status === "bloqueado" && (
-          <div className="mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+          <div className="mb-6 rounded-xl bg-[var(--pink)]/10 p-4 text-sm text-[var(--pink)]">
             Sua conta está <Badge variant="destructive">bloqueada</Badge>. Entre em contato com o
             suporte da plataforma.
           </div>

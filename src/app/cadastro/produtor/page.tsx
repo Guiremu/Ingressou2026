@@ -47,7 +47,7 @@ export default function CadastroProdutorPage() {
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="cpf">Seu CPF</Label>
                 <Input id="cpf" name="cpf" required inputMode="numeric" placeholder="000.000.000-00" />
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Sempre obrigatório: é o CPF do responsável legal pela conta.
                 </p>
               </div>
@@ -70,7 +70,7 @@ export default function CadastroProdutorPage() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="nome_fantasia">Nome de exibição / marca</Label>
               <Input id="nome_fantasia" name="nome_fantasia" placeholder="Ex: V8 Produções" />
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-[var(--text-muted)]">
                 Vira a URL da sua página: ingressou.com/seu-nome
               </p>
             </div>
@@ -90,15 +90,15 @@ export default function CadastroProdutorPage() {
               <Input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" />
             </div>
 
-            {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+            {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
 
             <Button type="submit" disabled={pending} className="mt-2">
               {pending ? "Enviando..." : "Enviar cadastro"}
             </Button>
           </form>
-          <p className="mt-6 text-center text-sm text-neutral-500">
+          <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
             Já tem conta?{" "}
-            <Link href="/login" className="font-medium text-neutral-900 underline">
+            <Link href="/login" className="font-medium text-white underline">
               Entrar
             </Link>
           </p>

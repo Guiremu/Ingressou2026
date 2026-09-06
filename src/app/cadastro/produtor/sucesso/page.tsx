@@ -14,7 +14,7 @@ export default function SucessoPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Link href="/login" className="font-medium text-neutral-900 underline">
+          <Link href="/login" className="font-medium text-white underline">
             Ir para o login
           </Link>
         </CardContent>

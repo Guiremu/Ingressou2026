@@ -42,14 +42,14 @@ export default function CadastroPage() {
               <Label htmlFor="password">Senha</Label>
               <Input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" />
             </div>
-            {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+            {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
             <Button type="submit" disabled={pending} className="mt-2">
               {pending ? "Criando conta..." : "Criar conta"}
             </Button>
           </form>
-          <p className="mt-6 text-center text-sm text-neutral-500">
+          <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
             Já tem conta?{" "}
-            <Link href="/login" className="font-medium text-neutral-900 underline">
+            <Link href="/login" className="font-medium text-white underline">
               Entrar
             </Link>
           </p>

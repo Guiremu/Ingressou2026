@@ -13,8 +13,8 @@ export default async function CheckinPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <h1 className="text-2xl font-bold text-neutral-900">Check-in — {event.titulo}</h1>
-      <p className="text-neutral-500">Aponte a câmera para o QR Code do ingresso.</p>
+      <h1 className="text-2xl font-bold text-white">Check-in — {event.titulo}</h1>
+      <p className="text-[var(--text-muted)]">Aponte a câmera para o QR Code do ingresso.</p>
       <CheckinScanner eventId={event.id} />
     </div>
   );

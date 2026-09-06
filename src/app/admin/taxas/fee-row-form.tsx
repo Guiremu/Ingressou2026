@@ -13,8 +13,8 @@ export function FeeRowForm({ id, metodo, parcelas, taxaAtual }: { id: string; me
   return (
     <form action={formAction} className="flex items-center gap-3 border-b border-neutral-100 py-2 text-sm">
       <input type="hidden" name="id" value={id} />
-      <span className="w-24 capitalize text-neutral-700">{metodo}</span>
-      <span className="w-16 text-neutral-500">{parcelas}x</span>
+      <span className="w-24 capitalize text-[var(--text-muted-2)]">{metodo}</span>
+      <span className="w-16 text-[var(--text-muted)]">{parcelas}x</span>
       <Input
         name="taxa_percentual"
         type="number"
@@ -22,7 +22,7 @@ export function FeeRowForm({ id, metodo, parcelas, taxaAtual }: { id: string; me
         defaultValue={(taxaAtual * 100).toFixed(2)}
         className="w-24"
       />
-      <span className="text-neutral-500">%</span>
+      <span className="text-[var(--text-muted)]">%</span>
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         Salvar
       </Button>

@@ -12,7 +12,7 @@ export function ValidatorForm({ eventId }: { eventId: string }) {
   const [state, formAction, pending] = useActionState(criarValidator, initialState);
 
   return (
-    <form action={formAction} className="flex flex-wrap items-end gap-3 rounded-lg border border-dashed border-neutral-300 p-4">
+    <form action={formAction} className="flex flex-wrap items-end gap-3 rounded-lg border border-dashed border-[var(--border-2)] p-4">
       <input type="hidden" name="event_id" value={eventId} />
       <div className="flex flex-col gap-1">
         <Label htmlFor="val_nome">Identificação</Label>
@@ -25,7 +25,7 @@ export function ValidatorForm({ eventId }: { eventId: string }) {
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Criando..." : "Criar link de validação"}
       </Button>
-      {state.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
+      {state.error && <p className="w-full text-sm text-[var(--error)]">{state.error}</p>}
     </form>
   );
 }

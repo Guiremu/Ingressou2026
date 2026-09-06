@@ -11,14 +11,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireRole(["admin"]);
 
   return (
-    <div className="flex flex-1 flex-col bg-neutral-50">
-      <header className="border-b border-neutral-200 bg-white">
+    <div className="flex flex-1 flex-col bg-[#07070b]">
+      <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[#07070b]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/admin" className="text-xl font-bold tracking-tight text-neutral-900">
-            ingressou <span className="font-normal text-neutral-400">gestor</span>
+          <Link
+            href="/admin"
+            className="font-[var(--font-sora)] text-base font-extrabold tracking-tight text-white"
+          >
+            ingressou <span className="font-medium text-[var(--text-dim)]">gestor</span>
           </Link>
           <form action="/logout" method="post">
-            <button type="submit" className="text-sm font-medium text-neutral-500 hover:text-neutral-900">
+            <button type="submit" className="text-sm font-medium text-[var(--text-muted)] hover:text-white">
               Sair
             </button>
           </form>
@@ -28,7 +31,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-white"
             >
               {item.label}
             </Link>
