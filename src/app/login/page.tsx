@@ -24,7 +24,15 @@ export default function LoginPage() {
           <form action={formAction} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="identifier">CPF, e-mail ou telefone</Label>
-              <Input id="identifier" name="identifier" required autoComplete="username" />
+              <Input
+                id="identifier"
+                name="identifier"
+                required
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">Senha</Label>

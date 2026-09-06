@@ -16,8 +16,11 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
     return { error: "Informe seu CPF, e-mail ou telefone e a senha." };
   }
 
-  // CPF/telefone são normalizados (só dígitos) antes de buscar; e-mail é mantido como digitado.
-  const identifier = identifierRaw.includes("@") ? identifierRaw : onlyDigits(identifierRaw);
+  // CPF/telefone são normalizados (só dígitos) antes de buscar; e-mail é normalizado para minúsculas
+  // (teclados de celular costumam capitalizar a primeira letra de campos de texto automaticamente).
+  const identifier = identifierRaw.includes("@")
+    ? identifierRaw.toLowerCase()
+    : onlyDigits(identifierRaw);
 
   const supabase = await createClient();
 
