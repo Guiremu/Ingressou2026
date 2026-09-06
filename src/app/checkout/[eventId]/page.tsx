@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requireLogin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/site/site-header";
 import { CheckoutForm, type LoteCarrinho, type FeeTable } from "./checkout-form";
@@ -14,6 +15,12 @@ export default async function CheckoutPage({
   const { itens: itensParam } = await searchParams;
 
   if (!itensParam) notFound();
+
+  // Comprar exige estar logado — quem não estiver é mandado pro login e volta
+  // pra cá (com o carrinho preservado) assim que entrar.
+  const profile = await requireLogin(
+    `/login?redirect=${encodeURIComponent(`/checkout/${eventId}?itens=${itensParam}`)}`,
+  );
 
   let selecao: { ticketTypeId: string; quantidade: number }[] = [];
   try {
@@ -81,6 +88,7 @@ export default async function CheckoutPage({
         mpPublicKey={mpPublicKey ?? null}
         feeTable={feeTable}
         taxaPlataformaPercentual={Number(platformConfig?.taxa_plataforma_percentual ?? 0.03)}
+        comprador={{ nome: profile.nome, email: profile.email, cpf: profile.cpf, telefone: profile.telefone }}
       />
     </div>
   );

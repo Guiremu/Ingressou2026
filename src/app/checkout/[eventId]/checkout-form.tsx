@@ -2,13 +2,20 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
-import { criarPedido, type CheckoutState } from "./actions";
+import { criarPedido, buscarDestinatarioPorCpf, type CheckoutState } from "./actions";
 import { calculateSplit } from "@/lib/split-calc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, onlyDigits } from "@/lib/utils";
 import type { PaymentMethod } from "@/types/database";
+
+export interface CompradorLogado {
+  nome: string;
+  email: string;
+  cpf: string;
+  telefone: string | null;
+}
 
 export interface LoteCarrinho {
   id: string;
@@ -48,6 +55,7 @@ export function CheckoutForm({
   mpPublicKey,
   feeTable,
   taxaPlataformaPercentual,
+  comprador,
 }: {
   eventId: string;
   eventTitulo: string;
@@ -55,6 +63,7 @@ export function CheckoutForm({
   mpPublicKey: string | null;
   feeTable: FeeTable;
   taxaPlataformaPercentual: number;
+  comprador: CompradorLogado;
 }) {
   const [state, formAction, pending] = useActionState(criarPedido, initialState);
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -66,6 +75,24 @@ export function CheckoutForm({
   const formRef = useRef<HTMLFormElement>(null);
   const tokenizedRef = useRef(false);
   const [sdkReady, setSdkReady] = useState(false);
+
+  const [presenteando, setPresenteando] = useState(false);
+  const [destinatarioCpf, setDestinatarioCpf] = useState("");
+  const [destinatario, setDestinatario] = useState<{ nome: string } | null>(null);
+  const [buscandoDestinatario, setBuscandoDestinatario] = useState(false);
+  const [erroDestinatario, setErroDestinatario] = useState("");
+
+  async function verificarDestinatario(cpf: string) {
+    const cpfLimpo = onlyDigits(cpf);
+    setDestinatario(null);
+    setErroDestinatario("");
+    if (cpfLimpo.length !== 11) return;
+    setBuscandoDestinatario(true);
+    const resultado = await buscarDestinatarioPorCpf(cpfLimpo);
+    setBuscandoDestinatario(false);
+    if (resultado.nome) setDestinatario({ nome: resultado.nome });
+    else setErroDestinatario("Não encontramos uma conta com esse CPF. A pessoa precisa ter um cadastro na ingressou.");
+  }
 
   const subtotal = lotes.reduce((acc, l) => acc + (qtds[l.id] ?? 0) * l.preco, 0);
   const qtdTotal = Object.values(qtds).reduce((a, b) => a + b, 0);
@@ -176,8 +203,11 @@ export function CheckoutForm({
         ? `Gerar PIX de ${formatCurrency(split.valorTotalCobrado)}`
         : `Pagar ${formatCurrency(split.valorTotalCobrado)}`;
 
+  const dadosIncompletos = step === 2 && presenteando && !destinatario;
+
   function avancar(e: React.MouseEvent) {
     e.preventDefault();
+    if (dadosIncompletos) return;
     if (step < 3) setStep((s) => (s === 1 ? 2 : 3) as 1 | 2 | 3);
   }
 
@@ -223,6 +253,8 @@ export function CheckoutForm({
           <input type="hidden" name="payment_method_id" />
           <input type="hidden" name="parcelas" value={metodo === "pix" ? 1 : parcelas} />
           <input type="hidden" name="metodo_pagamento" value={metodo} />
+          <input type="hidden" name="presenteando" value={presenteando ? "1" : ""} />
+          {presenteando && <input type="hidden" name="destinatario_cpf" value={destinatarioCpf} />}
 
           <div className="flex min-w-0 flex-col gap-[22px]">
             {step === 1 && (
@@ -270,26 +302,58 @@ export function CheckoutForm({
 
             {step === 2 && (
               <div className="flex flex-col gap-3">
-                <h2 className="font-[var(--font-sora)] text-[17px] font-bold text-white">2. Dados do comprador</h2>
+                <h2 className="font-[var(--font-sora)] text-[17px] font-bold text-white">2. Para quem é esse ingresso?</h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="comprador_nome">Nome completo</Label>
-                    <Input id="comprador_nome" name="comprador_nome" required />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="comprador_cpf">CPF</Label>
-                    <Input id="comprador_cpf" name="comprador_cpf" required inputMode="numeric" />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="comprador_email">E-mail</Label>
-                    <Input id="comprador_email" name="comprador_email" type="email" required />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="comprador_telefone">Celular / WhatsApp</Label>
-                    <Input id="comprador_telefone" name="comprador_telefone" inputMode="tel" />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPresenteando(false)}
+                    className={`flex flex-col gap-1 rounded-2xl border-[1.5px] bg-[var(--surface)] p-3.5 text-left ${
+                      !presenteando ? "border-[var(--accent)]" : "border-[var(--border-2)]"
+                    }`}
+                  >
+                    <span className="text-[15px] font-bold text-white">Para mim</span>
+                    <span className="text-xs text-[var(--text-muted-2)]">O ingresso fica na sua conta</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPresenteando(true)}
+                    className={`flex flex-col gap-1 rounded-2xl border-[1.5px] bg-[var(--surface)] p-3.5 text-left ${
+                      presenteando ? "border-[var(--accent)]" : "border-[var(--border-2)]"
+                    }`}
+                  >
+                    <span className="text-[15px] font-bold text-white">Comprar para outra pessoa</span>
+                    <span className="text-xs text-[var(--text-muted-2)]">Vai direto pra conta dela</span>
+                  </button>
                 </div>
-                <p className="text-xs text-[var(--text-dim)]">O ingresso é enviado por e-mail. Confira os dados antes de pagar.</p>
+
+                {!presenteando && (
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
+                    <p className="text-white">{comprador.nome}</p>
+                    <p className="text-[var(--text-muted-2)]">{comprador.email}</p>
+                    <p className="text-[var(--text-muted-2)]">CPF {comprador.cpf}</p>
+                  </div>
+                )}
+
+                {presenteando && (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="destinatario_cpf_input">CPF de quem vai receber o ingresso</Label>
+                    <Input
+                      id="destinatario_cpf_input"
+                      inputMode="numeric"
+                      value={destinatarioCpf}
+                      onChange={(e) => setDestinatarioCpf(e.target.value)}
+                      onBlur={(e) => verificarDestinatario(e.target.value)}
+                      placeholder="Só números"
+                    />
+                    {buscandoDestinatario && <p className="text-xs text-[var(--text-dim)]">Verificando...</p>}
+                    {destinatario && (
+                      <p className="text-xs text-[var(--success)]">Ingresso vai para: {destinatario.nome}</p>
+                    )}
+                    {erroDestinatario && <p className="text-xs text-[var(--error)]">{erroDestinatario}</p>}
+                  </div>
+                )}
+
+                <p className="text-xs text-[var(--text-dim)]">O ingresso aparece em &quot;Meus ingressos&quot; de quem vai usá-lo.</p>
               </div>
             )}
 
@@ -436,7 +500,7 @@ export function CheckoutForm({
             <Button
               type={step < 3 ? "button" : "submit"}
               onClick={step < 3 ? avancar : undefined}
-              disabled={pending || qtdTotal === 0}
+              disabled={pending || qtdTotal === 0 || dadosIncompletos}
               className="rounded-[14px]"
             >
               {pending ? "Processando..." : ctaLabel}

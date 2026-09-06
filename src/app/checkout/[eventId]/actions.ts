@@ -25,6 +25,17 @@ interface ItemSelecionado {
   quantidade: number;
 }
 
+/** Confirma o nome de quem vai receber o ingresso, a partir do CPF, antes do pagamento. */
+export async function buscarDestinatarioPorCpf(cpf: string): Promise<{ nome?: string }> {
+  const cpfLimpo = onlyDigits(cpf);
+  if (cpfLimpo.length !== 11) return {};
+
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("find_profile_by_cpf", { p_cpf: cpfLimpo });
+  const destinatario = Array.isArray(data) ? data[0] : data;
+  return destinatario?.nome ? { nome: destinatario.nome } : {};
+}
+
 export async function criarPedido(
   _prevState: CheckoutState,
   formData: FormData,
@@ -38,10 +49,8 @@ export async function criarPedido(
   }
   itens = itens.filter((i) => i.quantidade > 0);
 
-  const compradorNome = String(formData.get("comprador_nome") ?? "").trim();
-  const compradorEmail = String(formData.get("comprador_email") ?? "").trim().toLowerCase();
-  const compradorCpf = onlyDigits(String(formData.get("comprador_cpf") ?? ""));
-  const compradorTelefone = onlyDigits(String(formData.get("comprador_telefone") ?? ""));
+  const presenteando = String(formData.get("presenteando") ?? "") === "1";
+  const destinatarioCpf = onlyDigits(String(formData.get("destinatario_cpf") ?? ""));
   const metodoPagamento = String(formData.get("metodo_pagamento") ?? "pix") as PaymentMethod;
   const parcelas = metodoPagamento === "credito" ? Number(formData.get("parcelas") ?? 1) : 1;
   const cardToken = String(formData.get("card_token") ?? "");
@@ -51,15 +60,48 @@ export async function criarPedido(
     return { error: "Selecione ao menos um ingresso." };
   }
 
-  if (!compradorNome || compradorCpf.length !== 11 || !compradorEmail) {
-    return { error: "Confira nome, CPF (11 dígitos) e e-mail." };
+  if (presenteando && destinatarioCpf.length !== 11) {
+    return { error: "Informe o CPF de quem vai receber o ingresso." };
   }
 
   if (metodoPagamento === "credito" && !cardToken) {
     return { error: "Não foi possível processar o cartão. Confira os dados e tente novamente." };
   }
 
+  const supabasePublicAuth = await createClient();
+  const {
+    data: { user: usuarioLogado },
+  } = await supabasePublicAuth.auth.getUser();
+
+  if (!usuarioLogado) {
+    return { error: "É necessário estar logado para comprar." };
+  }
+
   const admin = createAdminClient();
+
+  const { data: pagador } = await admin
+    .from("profiles")
+    .select("id, nome, email, cpf, telefone")
+    .eq("id", usuarioLogado.id)
+    .single();
+
+  if (!pagador) {
+    return { error: "Não foi possível carregar seus dados de conta. Tente sair e entrar novamente." };
+  }
+
+  let titular = pagador;
+  if (presenteando) {
+    const { data: destinatario } = await admin
+      .from("profiles")
+      .select("id, nome, email, cpf, telefone")
+      .eq("cpf", destinatarioCpf)
+      .single();
+
+    if (!destinatario) {
+      return { error: "Não encontramos uma conta com esse CPF. A pessoa precisa ter um cadastro na ingressou." };
+    }
+    titular = destinatario;
+  }
 
   const { data: event } = await admin
     .from("events")
@@ -124,13 +166,9 @@ export async function criarPedido(
     return acc + Number(tt.preco) * item.quantidade;
   }, 0);
 
-  const supabasePublic = await createClient();
-  const [taxaMpPercentual, taxaPlataformaPercentual, {
-    data: { user: usuarioLogado },
-  }] = await Promise.all([
-    getMpFeePercentual(supabasePublic, metodoPagamento, parcelas),
-    getPlatformFeePercentual(supabasePublic),
-    supabasePublic.auth.getUser(),
+  const [taxaMpPercentual, taxaPlataformaPercentual] = await Promise.all([
+    getMpFeePercentual(supabasePublicAuth, metodoPagamento, parcelas),
+    getPlatformFeePercentual(supabasePublicAuth),
   ]);
 
   const split = calculateSplit({
@@ -145,11 +183,11 @@ export async function criarPedido(
     .from("orders")
     .insert({
       event_id: eventId,
-      profile_id: usuarioLogado?.id ?? null,
-      comprador_nome: compradorNome,
-      comprador_email: compradorEmail,
-      comprador_cpf: compradorCpf,
-      comprador_telefone: compradorTelefone || null,
+      profile_id: titular.id,
+      comprador_nome: titular.nome,
+      comprador_email: titular.email,
+      comprador_cpf: titular.cpf,
+      comprador_telefone: titular.telefone,
       valor_ingressos: valorIngressos,
       valor_taxa_parcelamento: split.valorTaxaParcelamento,
       valor_total_cobrado: split.valorTotalCobrado,
@@ -198,8 +236,8 @@ export async function criarPedido(
       installments: parcelas,
       paymentMethodId: metodoPagamento === "pix" ? "pix" : paymentMethodId,
       token: metodoPagamento === "credito" ? cardToken : undefined,
-      payerEmail: compradorEmail,
-      payerCpf: compradorCpf,
+      payerEmail: pagador.email,
+      payerCpf: pagador.cpf,
       description: `Ingressos — ${event.titulo}`,
       externalReference: order.id,
       notificationUrl: `${siteUrl}/api/webhooks/mercadopago`,

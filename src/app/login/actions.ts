@@ -42,6 +42,11 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Só aceita caminhos internos (começando com "/" mas não "//", que seria um
+  // redirecionamento para outro domínio).
+  const redirectTo = String(formData.get("redirect") ?? "");
+  if (redirectTo.startsWith("/") && !redirectTo.startsWith("//")) redirect(redirectTo);
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
