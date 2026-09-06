@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/site/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
 import { EventCard } from "@/components/site/event-card";
 
 export default async function ProducerPage({
@@ -158,6 +159,7 @@ export default async function ProducerPage({
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

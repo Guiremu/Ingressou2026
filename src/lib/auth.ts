@@ -25,3 +25,14 @@ export async function requireRole(roles: UserRole[], redirectTo = "/login") {
 
   return profile;
 }
+
+/** Garante que há algum usuário logado, independente do papel (usado em "minha conta"/"meus ingressos"). */
+export async function requireLogin(redirectTo = "/login") {
+  const profile = await getCurrentProfile();
+
+  if (!profile) {
+    redirect(redirectTo);
+  }
+
+  return profile;
+}

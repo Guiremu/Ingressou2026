@@ -39,3 +39,7 @@ export function onlyDigits(value: string) {
 export function diasAtrasISO(dias: number) {
   return new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString();
 }
+
+export function anoAtual() {
+  return new Date().getFullYear();
+}

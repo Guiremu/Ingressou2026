@@ -74,6 +74,7 @@ export interface TicketType {
 export interface Order {
   id: string;
   event_id: string;
+  profile_id: string | null;
   comprador_nome: string;
   comprador_email: string;
   comprador_cpf: string;
@@ -173,4 +174,7 @@ export const RESERVED_SLUGS = [
   "termos",
   "privacidade",
   "meu-ingresso",
+  "meus-ingressos",
+  "perfil",
+  "regras",
 ];

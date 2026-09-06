@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/site/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
 import { EventCard } from "@/components/site/event-card";
 import { EventFilters } from "@/components/site/event-filters";
 
@@ -106,6 +107,7 @@ export default async function VitrinePage({
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

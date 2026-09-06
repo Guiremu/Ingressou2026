@@ -125,9 +125,12 @@ export async function criarPedido(
   }, 0);
 
   const supabasePublic = await createClient();
-  const [taxaMpPercentual, taxaPlataformaPercentual] = await Promise.all([
+  const [taxaMpPercentual, taxaPlataformaPercentual, {
+    data: { user: usuarioLogado },
+  }] = await Promise.all([
     getMpFeePercentual(supabasePublic, metodoPagamento, parcelas),
     getPlatformFeePercentual(supabasePublic),
+    supabasePublic.auth.getUser(),
   ]);
 
   const split = calculateSplit({
@@ -142,6 +145,7 @@ export async function criarPedido(
     .from("orders")
     .insert({
       event_id: eventId,
+      profile_id: usuarioLogado?.id ?? null,
       comprador_nome: compradorNome,
       comprador_email: compradorEmail,
       comprador_cpf: compradorCpf,

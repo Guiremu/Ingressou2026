@@ -21,7 +21,7 @@ export async function SiteHeader() {
             <Link href="/produtores" className="hover:text-white">
               Produtores
             </Link>
-            <Link href="/login" className="hover:text-white">
+            <Link href="/meus-ingressos" className="hover:text-white">
               Meus ingressos
             </Link>
           </nav>
@@ -39,6 +39,9 @@ export async function SiteHeader() {
                   Gestor ADM
                 </Link>
               )}
+              <Link href="/perfil" className="text-sm text-[var(--text-muted-2)] hover:text-white">
+                {profile.nome.split(" ")[0]}
+              </Link>
               <form action="/logout" method="post">
                 <button type="submit" className="text-sm text-[var(--text-muted-2)] hover:text-white">
                   Sair
