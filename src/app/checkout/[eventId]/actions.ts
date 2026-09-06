@@ -9,7 +9,6 @@ import {
   getPlatformFeePercentual,
 } from "@/lib/mercadopago";
 import { finalizePaidOrder } from "@/lib/orders";
-import { onlyDigits } from "@/lib/utils";
 import type { PaymentMethod } from "@/types/database";
 
 export interface CheckoutState {
@@ -25,17 +24,6 @@ interface ItemSelecionado {
   quantidade: number;
 }
 
-/** Confirma o nome de quem vai receber o ingresso, a partir do CPF, antes do pagamento. */
-export async function buscarDestinatarioPorCpf(cpf: string): Promise<{ nome?: string }> {
-  const cpfLimpo = onlyDigits(cpf);
-  if (cpfLimpo.length !== 11) return {};
-
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("find_profile_by_cpf", { p_cpf: cpfLimpo });
-  const destinatario = Array.isArray(data) ? data[0] : data;
-  return destinatario?.nome ? { nome: destinatario.nome } : {};
-}
-
 export async function criarPedido(
   _prevState: CheckoutState,
   formData: FormData,
@@ -49,8 +37,6 @@ export async function criarPedido(
   }
   itens = itens.filter((i) => i.quantidade > 0);
 
-  const presenteando = String(formData.get("presenteando") ?? "") === "1";
-  const destinatarioCpf = onlyDigits(String(formData.get("destinatario_cpf") ?? ""));
   const metodoPagamento = String(formData.get("metodo_pagamento") ?? "pix") as PaymentMethod;
   const parcelas = metodoPagamento === "credito" ? Number(formData.get("parcelas") ?? 1) : 1;
   const cardToken = String(formData.get("card_token") ?? "");
@@ -58,10 +44,6 @@ export async function criarPedido(
 
   if (itens.length === 0) {
     return { error: "Selecione ao menos um ingresso." };
-  }
-
-  if (presenteando && destinatarioCpf.length !== 11) {
-    return { error: "Informe o CPF de quem vai receber o ingresso." };
   }
 
   if (metodoPagamento === "credito" && !cardToken) {
@@ -87,20 +69,6 @@ export async function criarPedido(
 
   if (!pagador) {
     return { error: "Não foi possível carregar seus dados de conta. Tente sair e entrar novamente." };
-  }
-
-  let titular = pagador;
-  if (presenteando) {
-    const { data: destinatario } = await admin
-      .from("profiles")
-      .select("id, nome, email, cpf, telefone")
-      .eq("cpf", destinatarioCpf)
-      .single();
-
-    if (!destinatario) {
-      return { error: "Não encontramos uma conta com esse CPF. A pessoa precisa ter um cadastro na ingressou." };
-    }
-    titular = destinatario;
   }
 
   const { data: event } = await admin
@@ -183,11 +151,11 @@ export async function criarPedido(
     .from("orders")
     .insert({
       event_id: eventId,
-      profile_id: titular.id,
-      comprador_nome: titular.nome,
-      comprador_email: titular.email,
-      comprador_cpf: titular.cpf,
-      comprador_telefone: titular.telefone,
+      profile_id: pagador.id,
+      comprador_nome: pagador.nome,
+      comprador_email: pagador.email,
+      comprador_cpf: pagador.cpf,
+      comprador_telefone: pagador.telefone,
       valor_ingressos: valorIngressos,
       valor_taxa_parcelamento: split.valorTaxaParcelamento,
       valor_total_cobrado: split.valorTotalCobrado,

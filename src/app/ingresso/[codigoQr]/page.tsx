@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { buildQrPayload } from "@/lib/qr-payload";
 import { buildGoogleWalletSaveUrl } from "@/lib/google-wallet";
 import { SiteHeader } from "@/components/site/site-header";
+import { ShareTicketButton } from "@/components/site/share-ticket-button";
 import { formatDate } from "@/lib/utils";
 
 export default async function IngressoPage({ params }: { params: Promise<{ codigoQr: string }> }) {
@@ -132,6 +133,10 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
         </div>
 
         <div className="flex flex-col gap-2.5">
+          <ShareTicketButton eventoTitulo={event?.titulo ?? ""} />
+          <p className="px-1.5 text-center text-[11px] leading-relaxed text-[var(--text-dim)]">
+            Esse link abre este ingresso sem precisar de login — dá pra mandar pra outra pessoa usar.
+          </p>
           {walletUrl && (
             <a
               href={walletUrl}

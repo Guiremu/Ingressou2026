@@ -17,7 +17,7 @@ export default async function MeusIngressosPage() {
     .select(
       "id, status, valor_total_cobrado, criado_em, events(titulo, imagem_url, data_inicio, cidade), tickets(id, codigo_qr, status)",
     )
-    .or(`profile_id.eq.${profile.id},comprador_email.eq.${profile.email}`)
+    .eq("profile_id", profile.id)
     .order("criado_em", { ascending: false });
 
   return (
@@ -27,7 +27,7 @@ export default async function MeusIngressosPage() {
         <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">
           Meus ingressos
         </h1>
-        <p className="mt-1 text-[var(--text-muted)]">Pedidos feitos com o e-mail {profile.email}.</p>
+        <p className="mt-1 text-[var(--text-muted)]">Pedidos feitos com a sua conta.</p>
 
         <div className="mt-6 flex flex-col gap-3">
           {(!orders || orders.length === 0) && (
