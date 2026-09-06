@@ -66,6 +66,21 @@ e RLS no Supabase.
 
 5. `npm install && npm run dev`.
 
+## Dados de exemplo (seed)
+
+`scripts/seed.mjs` popula o banco com produtores, eventos, lotes e alguns pedidos pagos de
+exemplo — os mesmos nomes/preços usados no protótipo de design (V8 Produções, Baile do Sertão,
+etc.), com fotos de capa reais do Unsplash. Rode com o `.env.local` já preenchido:
+
+```bash
+node scripts/seed.mjs
+```
+
+É idempotente (pode rodar de novo sem duplicar produtores/eventos/lotes já existentes pelo slug/
+nome). Os produtores de exemplo são criados com login `<slug>@ingressou.demo` / senha
+`Ingressou@2026`, mas normalmente não é preciso logar como eles — o objetivo é só popular a
+vitrine, o dashboard e o painel do Gestor ADM com números reais.
+
 ## Webhook do Mercado Pago
 
 Configure a notification URL da aplicação para `https://SEU_DOMINIO/api/webhooks/mercadopago`.
