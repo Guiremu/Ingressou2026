@@ -1,7 +1,40 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { getPayment } from "@/lib/mercadopago";
 import { finalizePaidOrder, markOrderFailed } from "@/lib/orders";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+/**
+ * Valida o header x-signature conforme o algoritmo do Mercado Pago:
+ * HMAC-SHA256("id:{data.id};request-id:{x-request-id};ts:{ts};", secret) deve bater com o v1
+ * enviado. Sem isso, qualquer um poderia forjar um POST pra esse endpoint — mesmo o webhook
+ * nunca confiando cegamente no corpo da notificação (sempre confirmamos consultando a API do MP),
+ * a assinatura barra essas tentativas antes de gastar uma chamada à API.
+ */
+function assinaturaValida(request: Request, dataId: string): boolean {
+  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  if (!secret) return true; // sem secret configurado, não há o que validar (dev local)
+
+  const xSignature = request.headers.get("x-signature");
+  const xRequestId = request.headers.get("x-request-id");
+  if (!xSignature || !xRequestId) return false;
+
+  let ts = "";
+  let hash = "";
+  for (const part of xSignature.split(",")) {
+    const [key, value] = part.split("=").map((s) => s.trim());
+    if (key === "ts") ts = value;
+    if (key === "v1") hash = value;
+  }
+  if (!ts || !hash) return false;
+
+  const manifest = `id:${dataId.toLowerCase()};request-id:${xRequestId};ts:${ts};`;
+  const esperado = createHmac("sha256", secret).update(manifest).digest("hex");
+
+  const a = Buffer.from(hash, "hex");
+  const b = Buffer.from(esperado, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 /**
  * Webhook do Mercado Pago (payment.updated). O MP notifica por query string
@@ -24,6 +57,11 @@ export async function POST(request: Request) {
   }
 
   if (!paymentId || (topic && topic !== "payment")) {
+    return NextResponse.json({ received: true });
+  }
+
+  if (!assinaturaValida(request, paymentId)) {
+    console.error("Webhook do Mercado Pago: assinatura inválida, ignorando notificação.");
     return NextResponse.json({ received: true });
   }
 
