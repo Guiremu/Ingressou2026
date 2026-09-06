@@ -24,6 +24,10 @@ export function LoteForm({ eventId }: { eventId: string }) {
           <Input id="lote_preco" name="preco" type="number" step="0.01" min="0" required />
         </div>
       </div>
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="lote_descricao">Descrição (opcional)</Label>
+        <Input id="lote_descricao" name="descricao" placeholder="Acesso à área de pista..." />
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <Label htmlFor="lote_qtd">Quantidade total</Label>

@@ -19,9 +19,11 @@ export default async function TaxasPage() {
     .single();
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-white">Taxas</h1>
-
+    <div className="flex flex-col">
+      <div className="border-b border-[#263041] bg-[#0f141d] px-5 py-4">
+        <h1 className="font-[var(--font-sora)] text-[19px] font-bold tracking-tight text-white">Configuração de taxas</h1>
+      </div>
+      <div className="flex flex-col gap-6 p-5">
       <Card>
         <CardHeader>
           <CardTitle>Taxa da plataforma</CardTitle>
@@ -52,6 +54,7 @@ export default async function TaxasPage() {
           ))}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

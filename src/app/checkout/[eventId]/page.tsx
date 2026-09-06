@@ -1,20 +1,27 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/site/site-header";
-import { CheckoutForm } from "./checkout-form";
-import { formatCurrency } from "@/lib/utils";
+import { CheckoutForm, type LoteCarrinho, type FeeTable } from "./checkout-form";
 
 export default async function CheckoutPage({
   params,
   searchParams,
 }: {
   params: Promise<{ eventId: string }>;
-  searchParams: Promise<{ lote?: string }>;
+  searchParams: Promise<{ itens?: string }>;
 }) {
   const { eventId } = await params;
-  const { lote } = await searchParams;
+  const { itens: itensParam } = await searchParams;
 
-  if (!lote) notFound();
+  if (!itensParam) notFound();
+
+  let selecao: { ticketTypeId: string; quantidade: number }[] = [];
+  try {
+    selecao = JSON.parse(decodeURIComponent(itensParam)).filter((i: { quantidade: number }) => i.quantidade > 0);
+  } catch {
+    notFound();
+  }
+  if (selecao.length === 0) notFound();
 
   const supabase = await createClient();
 
@@ -27,39 +34,54 @@ export default async function CheckoutPage({
 
   if (!event) notFound();
 
-  const { data: ticketType } = await supabase
+  const { data: ticketTypes } = await supabase
     .from("ticket_types")
     .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
-    .eq("id", lote)
     .eq("event_id", eventId)
+    .in(
+      "id",
+      selecao.map((s) => s.ticketTypeId),
+    );
+
+  if (!ticketTypes || ticketTypes.length !== selecao.length) notFound();
+
+  const lotes: LoteCarrinho[] = selecao.map((s) => {
+    const tt = ticketTypes.find((t) => t.id === s.ticketTypeId)!;
+    return {
+      id: tt.id,
+      nome: tt.nome,
+      preco: Number(tt.preco),
+      quantidadeInicial: s.quantidade,
+      restantes: tt.quantidade_total - tt.quantidade_vendida + s.quantidade,
+      maxPorPedido: tt.max_por_pedido,
+    };
+  });
+
+  const { data: feeRows } = await supabase.from("mp_fee_table").select("metodo_pagamento, parcelas, taxa_percentual");
+  const { data: platformConfig } = await supabase
+    .from("platform_config")
+    .select("taxa_plataforma_percentual")
+    .eq("id", true)
     .single();
 
-  if (!ticketType || ticketType.quantidade_vendida >= ticketType.quantidade_total) notFound();
+  const feeTable: FeeTable = { pix: {}, credito: {} };
+  for (const row of feeRows ?? []) {
+    feeTable[row.metodo_pagamento as "pix" | "credito"][row.parcelas] = Number(row.taxa_percentual);
+  }
 
   const mpPublicKey = (event.producers as unknown as { mp_public_key: string | null } | null)?.mp_public_key;
 
   return (
     <div className="flex flex-1 flex-col">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
-        <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">
-          Finalizar compra
-        </h1>
-        <p className="mt-1 text-[var(--text-muted)]">{event.titulo}</p>
-        <p className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm text-[var(--text-muted-2)]">
-          {ticketType.nome} —{" "}
-          <span className="font-bold text-[var(--accent)]">{formatCurrency(Number(ticketType.preco))}</span> por
-          unidade
-        </p>
-
-        <CheckoutForm
-          eventId={event.id}
-          ticketTypeId={ticketType.id}
-          maxPorPedido={ticketType.max_por_pedido}
-          precoUnitario={Number(ticketType.preco)}
-          mpPublicKey={mpPublicKey ?? null}
-        />
-      </main>
+      <CheckoutForm
+        eventId={event.id}
+        eventTitulo={event.titulo}
+        lotes={lotes}
+        mpPublicKey={mpPublicKey ?? null}
+        feeTable={feeTable}
+        taxaPlataformaPercentual={Number(platformConfig?.taxa_plataforma_percentual ?? 0.03)}
+      />
     </div>
   );
 }

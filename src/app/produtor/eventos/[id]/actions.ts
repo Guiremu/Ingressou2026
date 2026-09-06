@@ -41,6 +41,7 @@ export async function criarLote(_prevState: FormState, formData: FormData): Prom
   await assertOwnsEvent(admin, eventId, producer.id);
 
   const nome = String(formData.get("nome") ?? "").trim();
+  const descricao = String(formData.get("descricao") ?? "").trim();
   const preco = Number(formData.get("preco") ?? 0);
   const quantidadeTotal = Number(formData.get("quantidade_total") ?? 0);
   const maxPorPedido = Number(formData.get("max_por_pedido") ?? 10);
@@ -54,6 +55,7 @@ export async function criarLote(_prevState: FormState, formData: FormData): Prom
   const { error } = await admin.from("ticket_types").insert({
     event_id: eventId,
     nome,
+    descricao: descricao || null,
     preco,
     quantidade_total: quantidadeTotal,
     max_por_pedido: maxPorPedido || 10,

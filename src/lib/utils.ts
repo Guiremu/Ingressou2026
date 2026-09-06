@@ -35,3 +35,7 @@ export function slugify(value: string) {
 export function onlyDigits(value: string) {
   return value.replace(/\D/g, "");
 }
+
+export function diasAtrasISO(dias: number) {
+  return new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString();
+}

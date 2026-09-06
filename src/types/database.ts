@@ -27,6 +27,9 @@ export interface Producer {
   razao_social: string;
   nome_fantasia: string | null;
   logo_url: string | null;
+  banner_url: string | null;
+  descricao: string | null;
+  cidade: string | null;
   mp_user_id: string | null;
   mp_access_token: string | null;
   mp_refresh_token: string | null;
@@ -57,6 +60,7 @@ export interface TicketType {
   id: string;
   event_id: string;
   nome: string;
+  descricao: string | null;
   preco: number;
   quantidade_total: number;
   quantidade_vendida: number;
@@ -70,8 +74,6 @@ export interface TicketType {
 export interface Order {
   id: string;
   event_id: string;
-  ticket_type_id: string;
-  quantidade: number;
   comprador_nome: string;
   comprador_email: string;
   comprador_cpf: string;
@@ -83,6 +85,15 @@ export interface Order {
   parcelas: number;
   mp_payment_id: string | null;
   status: OrderStatus;
+  criado_em: string;
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  ticket_type_id: string;
+  quantidade: number;
+  preco_unitario: number;
   criado_em: string;
 }
 
@@ -146,6 +157,7 @@ export const RESERVED_SLUGS = [
   "signup",
   "auth",
   "produtor",
+  "produtores",
   "api",
   "ingresso",
   "ingressos",

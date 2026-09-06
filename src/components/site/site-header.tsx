@@ -1,57 +1,64 @@
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 
 export async function SiteHeader() {
   const profile = await getCurrentProfile();
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[#07070b]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link
-          href="/"
-          className="font-[var(--font-sora)] text-lg font-extrabold tracking-tight text-white"
-        >
-          ingressou
-        </Link>
-        <nav className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-6">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="h-[22px] w-[22px] rounded-[7px] bg-[var(--accent)]" />
+            <span className="font-[var(--font-sora)] text-lg font-extrabold tracking-tight text-white">
+              ingressou
+            </span>
+          </Link>
+          <nav className="flex gap-5 text-sm text-[var(--text-muted-2)]">
+            <Link href="/" className="font-semibold text-white">
+              Eventos
+            </Link>
+            <Link href="/produtores" className="hover:text-white">
+              Produtores
+            </Link>
+            <Link href="/login" className="hover:text-white">
+              Meus ingressos
+            </Link>
+          </nav>
+        </div>
+        <div className="flex items-center gap-3.5">
           {profile ? (
             <>
               {(profile.role === "produtor" || profile.role === "colaborador") && (
-                <Link href="/produtor">
-                  <Button variant="outline" size="sm">
-                    Portal do Produtor
-                  </Button>
+                <Link href="/produtor" className="text-sm text-[var(--text-muted-2)] hover:text-white">
+                  Portal do Produtor
                 </Link>
               )}
               {profile.role === "admin" && (
-                <Link href="/admin">
-                  <Button variant="outline" size="sm">
-                    Gestor ADM
-                  </Button>
+                <Link href="/admin" className="text-sm text-[var(--text-muted-2)] hover:text-white">
+                  Gestor ADM
                 </Link>
               )}
               <form action="/logout" method="post">
-                <Button variant="ghost" size="sm" type="submit">
+                <button type="submit" className="text-sm text-[var(--text-muted-2)] hover:text-white">
                   Sair
-                </Button>
+                </button>
               </form>
             </>
           ) : (
             <>
-              <Link href="/cadastro/produtor">
-                <Button variant="ghost" size="sm">
-                  Sou produtor
-                </Button>
+              <Link href="/login" className="text-sm text-[var(--text-muted-2)] hover:text-white">
+                Entrar
               </Link>
-              <Link href="/login">
-                <Button variant="outline" size="sm">
-                  Entrar
-                </Button>
+              <Link
+                href="/cadastro/produtor"
+                className="rounded-full bg-[var(--accent)] px-[18px] py-2.5 text-[13px] font-bold text-[var(--accent-foreground)]"
+              >
+                Sou produtor
               </Link>
             </>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );

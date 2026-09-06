@@ -20,13 +20,24 @@ export interface CheckoutState {
   pixQrCodeBase64?: string;
 }
 
+interface ItemSelecionado {
+  ticketTypeId: string;
+  quantidade: number;
+}
+
 export async function criarPedido(
   _prevState: CheckoutState,
   formData: FormData,
 ): Promise<CheckoutState> {
   const eventId = String(formData.get("event_id") ?? "");
-  const ticketTypeId = String(formData.get("ticket_type_id") ?? "");
-  const quantidade = Number(formData.get("quantidade") ?? 1);
+  let itens: ItemSelecionado[] = [];
+  try {
+    itens = JSON.parse(String(formData.get("itens") ?? "[]"));
+  } catch {
+    return { error: "Carrinho inválido." };
+  }
+  itens = itens.filter((i) => i.quantidade > 0);
+
   const compradorNome = String(formData.get("comprador_nome") ?? "").trim();
   const compradorEmail = String(formData.get("comprador_email") ?? "").trim().toLowerCase();
   const compradorCpf = onlyDigits(String(formData.get("comprador_cpf") ?? ""));
@@ -36,8 +47,12 @@ export async function criarPedido(
   const cardToken = String(formData.get("card_token") ?? "");
   const paymentMethodId = String(formData.get("payment_method_id") ?? "");
 
-  if (!compradorNome || compradorCpf.length !== 11 || !compradorEmail || quantidade < 1) {
-    return { error: "Confira nome, CPF (11 dígitos), e-mail e quantidade." };
+  if (itens.length === 0) {
+    return { error: "Selecione ao menos um ingresso." };
+  }
+
+  if (!compradorNome || compradorCpf.length !== 11 || !compradorEmail) {
+    return { error: "Confira nome, CPF (11 dígitos) e e-mail." };
   }
 
   if (metodoPagamento === "credito" && !cardToken) {
@@ -46,41 +61,69 @@ export async function criarPedido(
 
   const admin = createAdminClient();
 
-  const { data: ticketType } = await admin
-    .from("ticket_types")
-    .select("*, events!inner(id, status, producer_id)")
-    .eq("id", ticketTypeId)
-    .eq("event_id", eventId)
+  const { data: event } = await admin
+    .from("events")
+    .select("id, titulo, status, producer_id")
+    .eq("id", eventId)
     .single();
 
-  if (!ticketType || ticketType.events.status !== "publicado") {
-    return { error: "Lote ou evento não encontrado." };
-  }
-
-  if (quantidade > ticketType.max_por_pedido) {
-    return { error: `Máximo de ${ticketType.max_por_pedido} ingressos por pedido para este lote.` };
+  if (!event || event.status !== "publicado") {
+    return { error: "Evento não encontrado." };
   }
 
   const { data: producer } = await admin
     .from("producers")
     .select("mp_access_token, status")
-    .eq("id", ticketType.events.producer_id)
+    .eq("id", event.producer_id)
     .single();
 
   if (!producer?.mp_access_token || producer.status !== "aprovado") {
     return { error: "Este produtor ainda não está apto a receber pagamentos." };
   }
 
-  const reserved = await admin.rpc("reserve_ticket_stock", {
-    p_ticket_type_id: ticketTypeId,
-    p_quantidade: quantidade,
-  });
+  const { data: ticketTypes } = await admin
+    .from("ticket_types")
+    .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
+    .eq("event_id", eventId)
+    .in(
+      "id",
+      itens.map((i) => i.ticketTypeId),
+    );
 
-  if (!reserved.data) {
-    return { error: "Ingressos insuficientes disponíveis neste lote." };
+  if (!ticketTypes || ticketTypes.length !== itens.length) {
+    return { error: "Um ou mais lotes não foram encontrados." };
   }
 
-  const valorIngressos = Number(ticketType.preco) * quantidade;
+  const reservados: ItemSelecionado[] = [];
+
+  for (const item of itens) {
+    const tt = ticketTypes.find((t) => t.id === item.ticketTypeId)!;
+    if (item.quantidade > tt.max_por_pedido) {
+      for (const r of reservados) {
+        await admin.rpc("release_ticket_stock", { p_ticket_type_id: r.ticketTypeId, p_quantidade: r.quantidade });
+      }
+      return { error: `Máximo de ${tt.max_por_pedido} ingressos por pedido para o lote "${tt.nome}".` };
+    }
+
+    const reserved = await admin.rpc("reserve_ticket_stock", {
+      p_ticket_type_id: item.ticketTypeId,
+      p_quantidade: item.quantidade,
+    });
+
+    if (!reserved.data) {
+      for (const r of reservados) {
+        await admin.rpc("release_ticket_stock", { p_ticket_type_id: r.ticketTypeId, p_quantidade: r.quantidade });
+      }
+      return { error: `Ingressos insuficientes disponíveis no lote "${tt.nome}".` };
+    }
+    reservados.push(item);
+  }
+
+  const valorIngressos = itens.reduce((acc, item) => {
+    const tt = ticketTypes.find((t) => t.id === item.ticketTypeId)!;
+    return acc + Number(tt.preco) * item.quantidade;
+  }, 0);
+
   const supabasePublic = await createClient();
   const [taxaMpPercentual, taxaPlataformaPercentual] = await Promise.all([
     getMpFeePercentual(supabasePublic, metodoPagamento, parcelas),
@@ -99,8 +142,6 @@ export async function criarPedido(
     .from("orders")
     .insert({
       event_id: eventId,
-      ticket_type_id: ticketTypeId,
-      quantidade,
       comprador_nome: compradorNome,
       comprador_email: compradorEmail,
       comprador_cpf: compradorCpf,
@@ -115,10 +156,25 @@ export async function criarPedido(
     .select("id")
     .single();
 
+  async function liberarTudo() {
+    for (const r of reservados) {
+      await admin.rpc("release_ticket_stock", { p_ticket_type_id: r.ticketTypeId, p_quantidade: r.quantidade });
+    }
+  }
+
   if (orderError || !order) {
-    await admin.rpc("release_ticket_stock", { p_ticket_type_id: ticketTypeId, p_quantidade: quantidade });
+    await liberarTudo();
     return { error: "Não foi possível criar o pedido: " + orderError?.message };
   }
+
+  await admin.from("order_items").insert(
+    itens.map((item) => ({
+      order_id: order.id,
+      ticket_type_id: item.ticketTypeId,
+      quantidade: item.quantidade,
+      preco_unitario: Number(ticketTypes.find((t) => t.id === item.ticketTypeId)!.preco),
+    })),
+  );
 
   await admin.from("payment_splits").insert({
     order_id: order.id,
@@ -140,7 +196,7 @@ export async function criarPedido(
       token: metodoPagamento === "credito" ? cardToken : undefined,
       payerEmail: compradorEmail,
       payerCpf: compradorCpf,
-      description: `Ingresso — ${ticketType.nome}`,
+      description: `Ingressos — ${event.titulo}`,
       externalReference: order.id,
       notificationUrl: `${siteUrl}/api/webhooks/mercadopago`,
     });
@@ -153,12 +209,11 @@ export async function criarPedido(
     }
 
     if (payment.status === "rejected" || payment.status === "cancelled") {
-      await admin.rpc("release_ticket_stock", { p_ticket_type_id: ticketTypeId, p_quantidade: quantidade });
+      await liberarTudo();
       await admin.from("orders").update({ status: "cancelado" }).eq("id", order.id);
       return { error: "Pagamento recusado. Tente outro cartão ou meio de pagamento." };
     }
 
-    // pix / pendente: aguarda confirmação assíncrona via webhook
     const pixData = payment.point_of_interaction?.transaction_data;
     return {
       orderId: order.id,
@@ -167,7 +222,7 @@ export async function criarPedido(
       pixQrCodeBase64: pixData?.qr_code_base64,
     };
   } catch (err) {
-    await admin.rpc("release_ticket_stock", { p_ticket_type_id: ticketTypeId, p_quantidade: quantidade });
+    await liberarTudo();
     await admin.from("orders").update({ status: "cancelado" }).eq("id", order.id);
     return { error: "Erro ao processar pagamento no Mercado Pago: " + (err as Error).message };
   }
