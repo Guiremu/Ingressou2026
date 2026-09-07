@@ -1,5 +1,5 @@
 import "server-only";
-import { MercadoPagoConfig, Payment, OAuth } from "mercadopago";
+import { MercadoPagoConfig, Payment, OAuth, Customer, CardToken } from "mercadopago";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PaymentMethod } from "@/types/database";
 export { calculateSplit } from "@/lib/split-calc";
@@ -65,6 +65,8 @@ export async function createTransparentPayment(params: {
   description: string;
   externalReference: string;
   notificationUrl: string;
+  /** Presente quando a cobrança usa um cartão salvo — vincula o pagamento ao customer do MP. */
+  mpCustomerId?: string;
 }) {
   const client = new MercadoPagoConfig({ accessToken: params.producerAccessToken });
   const payment = new Payment(client);
@@ -79,12 +81,59 @@ export async function createTransparentPayment(params: {
       external_reference: params.externalReference,
       notification_url: params.notificationUrl,
       application_fee: params.applicationFee,
-      payer: {
-        email: params.payerEmail,
-        identification: { type: "CPF", number: params.payerCpf },
-      },
+      payer: params.mpCustomerId
+        ? { type: "customer", id: params.mpCustomerId, email: params.payerEmail }
+        : { email: params.payerEmail, identification: { type: "CPF", number: params.payerCpf } },
     },
   });
+}
+
+/**
+ * Busca (por e-mail) ou cria um "customer" do Mercado Pago na conta do produtor — é onde
+ * ficam guardados os cartões salvos desse comprador para esse produtor específico (cada
+ * cobrança roda na conta MP do produtor via split payment, então o cofre de cartões também
+ * é por conta).
+ */
+export async function findOrCreateMpCustomer(producerAccessToken: string, email: string, firstName: string) {
+  const client = new MercadoPagoConfig({ accessToken: producerAccessToken });
+  const customer = new Customer(client);
+
+  const found = await customer.search({ options: { email } });
+  const existing = found.results?.find((c) => c.email?.toLowerCase() === email.toLowerCase());
+  if (existing?.id) return existing.id;
+
+  const created = await customer.create({ body: { email, first_name: firstName } });
+  if (!created.id) throw new Error("Não foi possível criar o cliente no Mercado Pago.");
+  return created.id;
+}
+
+/** Salva um cartão (a partir do token gerado no checkout) no customer do comprador. */
+export async function saveCardForCustomer(producerAccessToken: string, customerId: string, cardToken: string) {
+  const client = new MercadoPagoConfig({ accessToken: producerAccessToken });
+  const customer = new Customer(client);
+  return customer.createCard({ customerId, body: { token: cardToken } });
+}
+
+export async function listSavedCardsFromMp(producerAccessToken: string, customerId: string) {
+  const client = new MercadoPagoConfig({ accessToken: producerAccessToken });
+  const customer = new Customer(client);
+  return customer.listCards({ customerId });
+}
+
+/** Gera um novo token de cobrança a partir de um cartão salvo + CVV (obrigatório a cada cobrança). */
+export async function createCardTokenFromSavedCard(params: {
+  producerAccessToken: string;
+  cardId: string;
+  customerId: string;
+  securityCode: string;
+}) {
+  const client = new MercadoPagoConfig({ accessToken: params.producerAccessToken });
+  const cardToken = new CardToken(client);
+  const result = await cardToken.create({
+    body: { card_id: params.cardId, customer_id: params.customerId, security_code: params.securityCode },
+  });
+  if (!result.id) throw new Error("Não foi possível gerar o token do cartão salvo.");
+  return result.id;
 }
 
 export async function getPayment(paymentId: string) {

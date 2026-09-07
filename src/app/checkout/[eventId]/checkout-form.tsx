@@ -45,8 +45,15 @@ interface CardFormData {
   installments: string;
 }
 
-const PARCELAS_OPCOES = [1, 3, 6, 12];
+const PARCELAS_OPCOES = Array.from({ length: 12 }, (_, i) => i + 1);
 const initialState: CheckoutState = {};
+
+export interface CartaoSalvo {
+  id: string;
+  last_four_digits: string;
+  payment_method_id: string;
+  cardholder_name: string | null;
+}
 
 export function CheckoutForm({
   eventId,
@@ -56,6 +63,7 @@ export function CheckoutForm({
   feeTable,
   taxaPlataformaPercentual,
   comprador,
+  cartoesSalvos,
 }: {
   eventId: string;
   eventTitulo: string;
@@ -64,6 +72,7 @@ export function CheckoutForm({
   feeTable: FeeTable;
   taxaPlataformaPercentual: number;
   comprador: CompradorLogado;
+  cartoesSalvos: CartaoSalvo[];
 }) {
   const [state, formAction, pending] = useActionState(criarPedido, initialState);
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -72,12 +81,17 @@ export function CheckoutForm({
   );
   const [metodo, setMetodo] = useState<PaymentMethod>("pix");
   const [parcelas, setParcelas] = useState(1);
+  const [savedCardId, setSavedCardId] = useState<string>(cartoesSalvos[0]?.id ?? "");
+  const [securityCode, setSecurityCode] = useState("");
+  const [salvarCartao, setSalvarCartao] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const tokenizedRef = useRef(false);
   const [sdkReady, setSdkReady] = useState(false);
 
   const subtotal = lotes.reduce((acc, l) => acc + (qtds[l.id] ?? 0) * l.preco, 0);
   const qtdTotal = Object.values(qtds).reduce((a, b) => a + b, 0);
+  const isGratuito = subtotal === 0;
+  const usandoCartaoSalvo = metodo === "credito" && savedCardId !== "";
 
   const feePercentual =
     metodo === "pix" ? (feeTable.pix[1] ?? 0) : (feeTable.credito[parcelas] ?? feeTable.credito[1] ?? 0);
@@ -95,7 +109,7 @@ export function CheckoutForm({
   );
 
   useEffect(() => {
-    if (metodo !== "credito" || !sdkReady || !mpPublicKey || !formRef.current || step !== 3) return;
+    if (metodo !== "credito" || usandoCartaoSalvo || !sdkReady || !mpPublicKey || !formRef.current || step !== 3) return;
 
     const mp = new window.MercadoPago(mpPublicKey);
     const cardForm = mp.cardForm({
@@ -126,7 +140,7 @@ export function CheckoutForm({
         },
       },
     });
-  }, [metodo, sdkReady, mpPublicKey, step, split.valorTotalCobrado]);
+  }, [metodo, usandoCartaoSalvo, sdkReady, mpPublicKey, step, split.valorTotalCobrado]);
 
   if (state.status === "aprovado" && state.orderId) {
     return (
@@ -181,9 +195,11 @@ export function CheckoutForm({
   const ctaLabel =
     step < 3
       ? "Continuar"
-      : metodo === "pix"
-        ? `Gerar PIX de ${formatCurrency(split.valorTotalCobrado)}`
-        : `Pagar ${formatCurrency(split.valorTotalCobrado)}`;
+      : isGratuito
+        ? "Confirmar ingresso gratuito"
+        : metodo === "pix"
+          ? `Gerar PIX de ${formatCurrency(split.valorTotalCobrado)}`
+          : `Pagar ${formatCurrency(split.valorTotalCobrado)}`;
 
   function avancar(e: React.MouseEvent) {
     e.preventDefault();
@@ -231,7 +247,10 @@ export function CheckoutForm({
           <input type="hidden" name="card_token" />
           <input type="hidden" name="payment_method_id" />
           <input type="hidden" name="parcelas" value={metodo === "pix" ? 1 : parcelas} />
-          <input type="hidden" name="metodo_pagamento" value={metodo} />
+          <input type="hidden" name="metodo_pagamento" value={isGratuito ? "pix" : metodo} />
+          <input type="hidden" name="saved_card_id" value={usandoCartaoSalvo ? savedCardId : ""} />
+          <input type="hidden" name="security_code" value={usandoCartaoSalvo ? securityCode : ""} />
+          {!usandoCartaoSalvo && salvarCartao && <input type="hidden" name="salvar_cartao" value="on" />}
 
           <div className="flex min-w-0 flex-col gap-[22px]">
             {step === 1 && (
@@ -292,7 +311,20 @@ export function CheckoutForm({
               </div>
             )}
 
-            {step === 3 && (
+            {step === 3 && isGratuito && (
+              <div className="flex flex-col gap-3">
+                <h2 className="font-[var(--font-sora)] text-[17px] font-bold text-white">3. Confirmação</h2>
+                <div className="flex items-start gap-2.5 rounded-2xl border border-[var(--success)]/28 bg-[var(--success)]/10 p-4">
+                  <div className="mt-0.5 h-4 w-4 flex-none rounded-full bg-[var(--success)]" />
+                  <p className="text-sm leading-relaxed text-[#a7f3d0]">
+                    Este ingresso é gratuito — sem pagamento, sem taxas. É só confirmar e o ingresso já aparece em
+                    &quot;Meus ingressos&quot;.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && !isGratuito && (
               <div className="flex flex-col gap-3">
                 <h2 className="font-[var(--font-sora)] text-[17px] font-bold text-white">3. Pagamento</h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -329,23 +361,90 @@ export function CheckoutForm({
                 </div>
 
                 {metodo === "credito" && (
-                  <div className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <div className="flex min-w-0 flex-col gap-3 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
                     {mpPublicKey && <Script src="https://sdk.mercadopago.com/js/v2" onLoad={() => setSdkReady(true)} />}
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <input id="form-checkout__cardNumber" className="h-10 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
-                      <div className="flex gap-3">
-                        <input id="form-checkout__expirationDate" className="h-10 flex-1 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
-                        <input id="form-checkout__securityCode" className="h-10 flex-1 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
+
+                    {cartoesSalvos.length > 0 && (
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs text-[var(--text-muted-2)]">Cartões salvos</p>
+                        {cartoesSalvos.map((c) => (
+                          <button
+                            type="button"
+                            key={c.id}
+                            onClick={() => setSavedCardId(c.id)}
+                            className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-left text-sm ${
+                              savedCardId === c.id ? "border-[var(--accent)] bg-[#1b1b26]" : "border-[var(--border-2)] bg-[#1b1b26] text-[#e6e6f0]"
+                            }`}
+                          >
+                            <span className="font-medium text-white">
+                              {c.payment_method_id.toUpperCase()} •••• {c.last_four_digits}
+                            </span>
+                            <span
+                              className={`h-[16px] w-[16px] rounded-full ${savedCardId === c.id ? "bg-[var(--accent)]" : "shadow-[inset_0_0_0_1.5px_#4a4a60]"}`}
+                            />
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setSavedCardId("")}
+                          className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-left text-sm ${
+                            savedCardId === "" ? "border-[var(--accent)] bg-[#1b1b26]" : "border-[var(--border-2)] bg-[#1b1b26] text-[#e6e6f0]"
+                          }`}
+                        >
+                          <span className="font-medium text-white">Usar outro cartão</span>
+                          <span
+                            className={`h-[16px] w-[16px] rounded-full ${savedCardId === "" ? "bg-[var(--accent)]" : "shadow-[inset_0_0_0_1.5px_#4a4a60]"}`}
+                          />
+                        </button>
                       </div>
-                    </div>
-                    <Input id="form-checkout__cardholderName" placeholder="Titular do cartão" />
-                    <select id="form-checkout__issuer" className="h-10 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
-                    <select id="form-checkout__identificationType" className="h-10 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
-                    <Input id="form-checkout__identificationNumber" placeholder="CPF do titular" />
-                    <Input id="form-checkout__cardholderEmail" placeholder="E-mail do titular" />
+                    )}
+
+                    {usandoCartaoSalvo ? (
+                      <Input
+                        placeholder="CVV do cartão"
+                        maxLength={4}
+                        value={securityCode}
+                        onChange={(e) => setSecurityCode(e.target.value.replace(/\D/g, ""))}
+                        className="w-32"
+                      />
+                    ) : (
+                      <>
+                        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div
+                            id="form-checkout__cardNumber"
+                            className="h-10 w-full min-w-0 overflow-hidden rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white"
+                          />
+                          <div className="flex min-w-0 gap-3">
+                            <div
+                              id="form-checkout__expirationDate"
+                              className="h-10 min-w-0 flex-1 overflow-hidden rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white"
+                            />
+                            <div
+                              id="form-checkout__securityCode"
+                              className="h-10 min-w-0 flex-1 overflow-hidden rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white"
+                            />
+                          </div>
+                        </div>
+                        <Input id="form-checkout__cardholderName" placeholder="Titular do cartão" />
+                        <select id="form-checkout__issuer" className="h-10 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
+                        <select id="form-checkout__identificationType" className="h-10 rounded-xl border border-[var(--border-2)] bg-[#1b1b26] px-3 text-sm text-white" />
+                        <Input id="form-checkout__identificationNumber" placeholder="CPF do titular" />
+                        <Input id="form-checkout__cardholderEmail" placeholder="E-mail do titular" />
+
+                        <label className="flex items-center gap-2 text-xs text-[var(--text-muted-2)]">
+                          <input
+                            type="checkbox"
+                            checked={salvarCartao}
+                            onChange={(e) => setSalvarCartao(e.target.checked)}
+                            className="h-4 w-4 rounded border-[var(--border-2)] accent-[var(--accent)]"
+                          />
+                          Salvar este cartão para as próximas compras
+                        </label>
+                      </>
+                    )}
 
                     <p className="mt-1 text-xs text-[var(--text-muted-2)]">Parcelas</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
                       {PARCELAS_OPCOES.map((p) => {
                         const pct = feeTable.credito[p] ?? feeTable.credito[1] ?? 0;
                         const s = calculateSplit({
@@ -360,12 +459,12 @@ export function CheckoutForm({
                             type="button"
                             key={p}
                             onClick={() => setParcelas(p)}
-                            className={`min-w-[96px] rounded-xl px-3 py-2.5 text-left ${
+                            className={`min-w-0 rounded-xl px-2 py-2 text-left ${
                               parcelas === p ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "border border-[var(--border-2)] bg-[#1b1b26] text-[#e6e6f0]"
                             }`}
                           >
                             <div className="text-sm font-bold">{p === 1 ? "1x" : `${p}x`}</div>
-                            <div className="text-[11px] opacity-75">{formatCurrency(s.valorTotalCobrado / p)}</div>
+                            <div className="truncate text-[11px] opacity-75">{formatCurrency(s.valorTotalCobrado / p)}</div>
                           </button>
                         );
                       })}
@@ -412,18 +511,22 @@ export function CheckoutForm({
                 <span className="text-[var(--text-muted-2)]">Subtotal</span>
                 <span className="text-white">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex justify-between gap-3 text-[13px]">
-                <span className="text-[var(--text-muted-2)]">
-                  Taxa da plataforma ({(taxaPlataformaPercentual * 100).toFixed(0)}%)
-                </span>
-                <span className="text-white">{formatCurrency(split.taxaPlataforma)}</span>
-              </div>
-              <div className="flex justify-between gap-3 text-[13px]">
-                <span className="text-[var(--text-muted-2)]">
-                  Taxa de processamento (Mercado Pago{metodo === "pix" ? " · PIX" : parcelas > 1 ? ` · ${parcelas}x` : ""})
-                </span>
-                <span className="text-white">{formatCurrency(split.taxaMp)}</span>
-              </div>
+              {!isGratuito && (
+                <>
+                  <div className="flex justify-between gap-3 text-[13px]">
+                    <span className="text-[var(--text-muted-2)]">
+                      Taxa da plataforma ({(taxaPlataformaPercentual * 100).toFixed(0)}%)
+                    </span>
+                    <span className="text-white">{formatCurrency(split.taxaPlataforma)}</span>
+                  </div>
+                  <div className="flex justify-between gap-3 text-[13px]">
+                    <span className="text-[var(--text-muted-2)]">
+                      Taxa de processamento (Mercado Pago{metodo === "pix" ? " · PIX" : parcelas > 1 ? ` · ${parcelas}x` : ""})
+                    </span>
+                    <span className="text-white">{formatCurrency(split.taxaMp)}</span>
+                  </div>
+                </>
+              )}
             </div>
             <div className="h-px bg-[#262633]" />
             <div className="flex items-baseline justify-between gap-3">
@@ -433,7 +536,11 @@ export function CheckoutForm({
               </span>
             </div>
             <p className="text-xs text-[var(--text-muted-2)]">
-              {metodo === "pix" ? "PIX à vista · aprovação imediata" : `${parcelas}x de ${formatCurrency(split.valorTotalCobrado / parcelas)} no cartão`}
+              {isGratuito
+                ? "Ingresso gratuito · sem cobrança"
+                : metodo === "pix"
+                  ? "PIX à vista · aprovação imediata"
+                  : `${parcelas}x de ${formatCurrency(split.valorTotalCobrado / parcelas)} no cartão`}
             </p>
 
             {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
@@ -441,7 +548,7 @@ export function CheckoutForm({
             <Button
               type={step < 3 ? "button" : "submit"}
               onClick={step < 3 ? avancar : undefined}
-              disabled={pending || qtdTotal === 0}
+              disabled={pending || qtdTotal === 0 || (usandoCartaoSalvo && securityCode.length < 3)}
               className="rounded-[14px]"
             >
               {pending ? "Processando..." : ctaLabel}

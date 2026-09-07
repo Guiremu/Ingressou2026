@@ -10,7 +10,7 @@ import type { Order, OrderItem } from "@/types/database";
  * de um pagamento com cartão; se o pedido já estiver pago (ou já tiver ingressos
  * gerados), não faz nada.
  */
-export async function finalizePaidOrder(orderId: string, mpPaymentId: string) {
+export async function finalizePaidOrder(orderId: string, mpPaymentId: string | null) {
   const admin = createAdminClient();
 
   const { data: order } = await admin.from("orders").select("*").eq("id", orderId).single<Order>();

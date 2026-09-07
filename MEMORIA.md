@@ -263,6 +263,53 @@ evitar uma migração de coluna só por semântica).
 do valor do ingresso — o MP credita esse valor pra conta da plataforma automaticamente e
 o resto (menos a taxa própria do MP) pro produtor.
 
+### 8.1 Ingressos gratuitos não passam pelo Mercado Pago
+
+Quando o subtotal do carrinho é R$0,00 (só lotes com `preco = 0`), o checkout pula a etapa
+de escolha PIX/crédito inteiramente (`isGratuito` em `checkout-form.tsx`) e o servidor
+(`criarPedido` em `src/app/checkout/[eventId]/actions.ts`) detecta `valorIngressos === 0`
+(`gratuito`) e: não exige `producers.mp_access_token`/status aprovado, monta um
+`payment_splits` zerado, grava `orders.metodo_pagamento = 'gratuito'` (novo valor no enum
+`payment_method`, migração `0014`) e chama `finalizePaidOrder(order.id, null)` direto — sem
+nenhuma chamada ao MP. `finalizePaidOrder` aceita `mpPaymentId: string | null` agora.
+
+### 8.2 Cartões salvos (Mercado Pago Customers/Cards)
+
+Tabela `saved_cards` (migração `0014`): `profile_id`, `producer_id`, `mp_customer_id`,
+`mp_card_id`, `last_four_digits`, `payment_method_id`, `cardholder_name`. RLS: comprador só
+enxerga/apaga os próprios (`profile_id = auth.uid()`); insert/update só via admin client
+(server action). Um cartão é salvo **por produtor**, porque cada cobrança roda na conta MP
+daquele produtor específico (split payment via OAuth) — o "cofre" de cartões do MP também é
+por conta, não é global da plataforma.
+
+Fluxo (`src/lib/mercadopago.ts`, usa os recursos `Customer`/`CustomerCard`/`CardToken` do SDK
+`mercadopago` v3): ao marcar "salvar este cartão" e o pagamento ser feito com cartão novo,
+`findOrCreateMpCustomer` busca/cria um customer no MP (por e-mail, na conta do produtor) e
+`saveCardForCustomer` salva o cartão **usando o mesmo card_token** que acabou de ser gerado
+pro pagamento (chamado antes do `Payment.create`, mesmo token reaproveitado — save-card não
+"gasta" o token de pagamento). Numa compra seguinte pro mesmo produtor, o comprador escolhe o
+cartão salvo na lista e digita só o CVV; o servidor gera um token novo a partir de
+`card_id + customer_id + security_code` via `CardToken.create` (não precisa reabrir o iframe
+do MP) e paga com `payer: { type: "customer", id: customerId }`. Falha ao salvar o cartão
+nunca bloqueia a compra (try/catch silencioso, segue com pagamento normal).
+
+Trade-off registrado: o CVV do cartão salvo viaja como campo normal do form (server action),
+não via tokenização client-side — mais simples de implementar com o SDK server-side
+disponível, mas para compliance PCI mais rígido o ideal seria gerar esse token também no
+client. Reavaliar se o volume de transações justificar o esforço extra.
+
+### 8.3 Bug corrigido: campos de cartão vazando da tela
+
+O formulário de cartão novo (`cardForm` do SDK MP, modo `iframe: true`) usava `<input>` como
+container dos campos sensíveis (`cardNumber`, `expirationDate`, `securityCode`). A doc oficial
+do SDK (`sdk-js/docs/card-form.md`) exige que esses três sejam `<div>` — o MP injeta um
+`<iframe>` dentro do elemento, e um `<input>` não aceita filho, então o SDK acabava
+inserindo o iframe fora do fluxo normal do layout (com largura própria), estourando a tela
+pra direita. Trocado pra `<div>` com `overflow-hidden`/`min-w-0`/`w-full` — os outros campos
+(`cardholderName`, `issuer`, `identificationType/Number`, `cardholderEmail`) continuam
+`<input>`/`<select>` normais (não são tokenizados via iframe). Parcelamento também passou de
+`[1,3,6,12]` pra `1..12` completo (grid 4-6 colunas em vez de flex-wrap).
+
 ## 9. Portal do Produtor (`/produtor/**`)
 
 Shell: `src/app/produtor/layout.tsx` — sidebar (desktop) / bottom-tabs (mobile) com nav

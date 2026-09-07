@@ -41,19 +41,25 @@ export default async function CheckoutPage({
 
   if (!event) notFound();
 
-  // As três só dependem de `event` já resolvido, não umas das outras — em paralelo.
-  const [{ data: ticketTypes }, { data: feeRows }, { data: platformConfig }] = await Promise.all([
-    supabase
-      .from("ticket_types")
-      .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
-      .eq("event_id", eventId)
-      .in(
-        "id",
-        selecao.map((s) => s.ticketTypeId),
-      ),
-    supabase.from("mp_fee_table").select("metodo_pagamento, parcelas, taxa_percentual"),
-    supabase.from("platform_config").select("taxa_plataforma_percentual").eq("id", true).single(),
-  ]);
+  // As quatro só dependem de `event` já resolvido, não umas das outras — em paralelo.
+  const [{ data: ticketTypes }, { data: feeRows }, { data: platformConfig }, { data: cartoesSalvos }] =
+    await Promise.all([
+      supabase
+        .from("ticket_types")
+        .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
+        .eq("event_id", eventId)
+        .in(
+          "id",
+          selecao.map((s) => s.ticketTypeId),
+        ),
+      supabase.from("mp_fee_table").select("metodo_pagamento, parcelas, taxa_percentual"),
+      supabase.from("platform_config").select("taxa_plataforma_percentual").eq("id", true).single(),
+      supabase
+        .from("saved_cards")
+        .select("id, last_four_digits, payment_method_id, cardholder_name")
+        .eq("producer_id", event.producer_id)
+        .order("criado_em", { ascending: false }),
+    ]);
 
   if (!ticketTypes || ticketTypes.length !== selecao.length) notFound();
 
@@ -87,6 +93,7 @@ export default async function CheckoutPage({
         feeTable={feeTable}
         taxaPlataformaPercentual={Number(platformConfig?.taxa_plataforma_percentual ?? 0.03)}
         comprador={{ nome: profile.nome, email: profile.email, cpf: profile.cpf, telefone: profile.telefone }}
+        cartoesSalvos={cartoesSalvos ?? []}
       />
     </div>
   );
