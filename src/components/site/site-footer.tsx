@@ -7,6 +7,7 @@ const links = [
   { href: "/termos", label: "Termos de uso" },
   { href: "/privacidade", label: "Privacidade" },
   { href: "/regras", label: "Regras de compra" },
+  { href: "/direitos-autorais", label: "Direitos autorais" },
 ];
 
 export function SiteFooter() {
@@ -21,7 +22,9 @@ export function SiteFooter() {
             </Link>
           ))}
         </nav>
-        <span className="text-xs text-[var(--text-dim)]">© {anoAtual()} ingressou</span>
+        <Link href="/direitos-autorais" className="text-xs text-[var(--text-dim)] hover:text-white">
+          © {anoAtual()} ingressou
+        </Link>
       </div>
     </footer>
   );
