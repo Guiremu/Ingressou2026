@@ -1,170 +1,63 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { requireProducer } from "@/lib/producer";
+import { getEventoDoProdutor } from "@/lib/producer";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
-import { StatusActions } from "./status-actions";
-import { LoteForm } from "./lote-form";
-import { LoteRow } from "./lote-row";
-import { CortesiaForm } from "./cortesia-form";
-import { ValidatorForm } from "./validator-form";
-import { ValidatorToggle } from "./validator-toggle";
+import { formatCurrency } from "@/lib/utils";
 import { EventEditForm } from "./event-edit-form";
 import { ExcluirEventoButton } from "./excluir-evento-button";
-import type { EventRow, Ticket, TicketType } from "@/types/database";
 
-const motivoLabel = { funcionario: "Funcionário", amigo: "Amigo", patrocinador: "Patrocinador", outro: "Outro" };
-
-export default async function EventoPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function VisaoGeralPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { producer } = await requireProducer();
+  const { event } = await getEventoDoProdutor(id);
   const supabase = await createClient();
 
-  const { data: event } = await supabase.from("events").select("*").eq("id", id).single<EventRow>();
-  if (!event || event.producer_id !== producer.id) notFound();
-
-  const [{ data: ticketTypes }, { data: validators }, { data: cortesias }] = await Promise.all([
-    supabase.from("ticket_types").select("*").eq("event_id", id).order("ordem", { ascending: true }),
-    supabase.from("validators").select("*").eq("event_id", id).order("criado_em", { ascending: false }),
+  const [{ data: lotes }, { data: orders }, { count: cortesiasCount }] = await Promise.all([
+    supabase.from("ticket_types").select("quantidade_total, quantidade_vendida").eq("event_id", id).eq("tipo", "pago"),
+    supabase.from("orders").select("valor_ingressos").eq("event_id", id).eq("status", "pago"),
     supabase
       .from("tickets")
-      .select("*")
+      .select("*", { count: "exact", head: true })
       .eq("event_id", id)
-      .eq("is_cortesia", true)
-      .order("criado_em", { ascending: false }),
+      .eq("is_cortesia", true),
   ]);
 
-  const lotesPagos = (ticketTypes ?? []).filter((tt): tt is TicketType => tt.tipo === "pago");
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const vendidos = (lotes ?? []).reduce((acc, l) => acc + l.quantidade_vendida, 0);
+  const capacidade = (lotes ?? []).reduce((acc, l) => acc + l.quantidade_total, 0);
+  const receita = (orders ?? []).reduce((acc, o) => acc + Number(o.valor_ingressos), 0);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-white">{event.titulo}</h1>
-          <p className="text-[var(--text-muted)]">
-            {formatDate(event.data_inicio)} — {event.cidade}
-          </p>
-          <Badge variant="secondary" className="mt-2">
-            {event.status}
-          </Badge>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <StatusActions eventId={event.id} status={event.status} />
-          {event.status === "publicado" && (
-            <Link
-              href={`/${producer.slug}/${event.slug}`}
-              target="_blank"
-              className="text-sm font-medium text-[var(--text-muted-2)] underline"
-            >
-              Ver página pública ↗
-            </Link>
-          )}
-          <Link
-            href={`/produtor/eventos/${event.id}/checkin`}
-            className="text-sm font-medium text-[var(--text-muted-2)] underline"
+    <>
+      <div className="flex flex-wrap overflow-hidden rounded-2xl border border-[#263041] bg-[#121722]">
+        {[
+          { label: "Ingressos vendidos", valor: `${vendidos} / ${capacidade || "—"}` },
+          { label: "Receita em ingressos", valor: formatCurrency(receita), cor: "text-[var(--accent)]" },
+          { label: "Cortesias emitidas", valor: String(cortesiasCount ?? 0) },
+        ].map((stat, i, arr) => (
+          <div
+            key={stat.label}
+            className={`flex flex-1 flex-col gap-1 p-3.5 ${i < arr.length - 1 ? "border-r border-[#263041]" : ""}`}
+            style={{ minWidth: 160 }}
           >
-            Abrir check-in (câmera)
-          </Link>
-          <Link
-            href={`/produtor/eventos/${event.id}/ingressos`}
-            className="text-sm font-medium text-[var(--text-muted-2)] underline"
-          >
-            Ver / exportar ingressos
-          </Link>
-        </div>
+            <span className="text-xs text-[#93a0b8]">{stat.label}</span>
+            <span className={`font-[var(--font-sora)] text-[21px] font-bold ${stat.cor ?? "text-white"}`}>
+              {stat.valor}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Dados do evento</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EventEditForm event={event} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Lotes de ingresso</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          {lotesPagos.map((tt, i) => (
-            <LoteRow key={tt.id} lote={tt} isFirst={i === 0} isLast={i === lotesPagos.length - 1} />
-          ))}
-          <LoteForm eventId={event.id} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Ingressos cortesia</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <CortesiaForm eventId={event.id} />
-          {cortesias && cortesias.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-dim)]">
-                {cortesias.length} gerada(s)
-              </p>
-              {(cortesias as Ticket[]).map((c) => (
-                <div
-                  key={c.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border)] p-3 text-sm"
-                >
-                  <div>
-                    <p className="font-medium text-white">
-                      {c.titular_nome ?? "Sem nome definido"}{" "}
-                      {c.intransferivel && <Badge variant="warning">intransferível</Badge>}
-                    </p>
-                    <p className="text-[var(--text-muted)]">
-                      {motivoLabel[c.motivo_cortesia ?? "outro"]}
-                      {c.titular_cpf && ` · CPF ${c.titular_cpf}`}
-                    </p>
-                  </div>
-                  <Badge variant={c.status === "usado" ? "secondary" : c.status === "cancelado" ? "destructive" : "success"}>
-                    {c.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Colaboradores de portaria</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          {validators?.map((v) => (
-            <div
-              key={v.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border)] p-3"
-            >
-              <div>
-                <p className="font-medium text-white">{v.nome_identificacao}</p>
-                <p className="break-all text-xs text-[var(--text-muted)]">
-                  {siteUrl}/validar/{event.slug}?token={v.token_publico}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={v.ativo ? "success" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge>
-                <ValidatorToggle id={v.id} ativo={v.ativo} />
-              </div>
-            </div>
-          ))}
-          <ValidatorForm eventId={event.id} />
-        </CardContent>
-      </Card>
+      <div className="rounded-2xl border border-[#263041] bg-[#121722] p-4.5">
+        <h2 className="mb-3.5 font-[var(--font-sora)] text-base font-bold text-white">Dados do evento</h2>
+        <EventEditForm event={event} />
+      </div>
 
       {event.status === "rascunho" && (
-        <div>
+        <div className="rounded-2xl border border-[var(--pink)]/30 bg-[var(--pink)]/5 p-4.5">
+          <h2 className="mb-1 font-[var(--font-sora)] text-base font-bold text-white">Zona de risco</h2>
+          <p className="mb-3 text-sm text-[#93a0b8]">
+            Excluir um evento em rascunho apaga tudo (lotes, cortesias) sem volta.
+          </p>
           <ExcluirEventoButton eventId={event.id} />
         </div>
       )}
-    </div>
+    </>
   );
 }

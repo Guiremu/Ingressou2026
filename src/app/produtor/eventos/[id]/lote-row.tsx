@@ -51,7 +51,7 @@ export function LoteRow({
           fd.set("lote_id", lote.id);
           formAction(fd);
         }}
-        className="flex flex-col gap-3 rounded-lg border border-[var(--border-2)] p-4"
+        className="flex flex-col gap-3 rounded-[14px] border border-[#263041] bg-[#18202e] p-4"
       >
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
@@ -128,15 +128,15 @@ export function LoteRow({
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-[var(--border)] p-3">
+    <div className="flex flex-col gap-2.5 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="font-medium text-white">
             {lote.nome} {!lote.ativo && <Badge variant="secondary">pausado</Badge>}
           </p>
-          <p className="text-sm text-[var(--text-muted)]">{formatCurrency(Number(lote.preco))}</p>
+          <p className="text-sm text-[#93a0b8]">{formatCurrency(Number(lote.preco))}</p>
         </div>
-        <p className="text-sm text-[var(--text-muted)]">
+        <p className="text-sm text-[#93a0b8]">
           {lote.quantidade_vendida} / {lote.quantidade_total} vendidos
         </p>
       </div>

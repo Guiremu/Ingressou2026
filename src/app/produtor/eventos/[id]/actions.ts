@@ -336,6 +336,15 @@ export async function gerarCortesia(_prevState: FormState, formData: FormData): 
     cortesiaLote = novoLote;
   }
 
+  // Se o CPF bater com uma conta já cadastrada, o ingresso já nasce vinculado a ela
+  // (aparece direto em "Meus ingressos" da pessoa). Sem conta, fica só na listagem —
+  // o produtor pode vincular depois manualmente.
+  let vinculadoProfileId: string | null = null;
+  if (titularCpf.length === 11) {
+    const { data: perfilEncontrado } = await admin.from("profiles").select("id").eq("cpf", titularCpf).maybeSingle();
+    vinculadoProfileId = perfilEncontrado?.id ?? null;
+  }
+
   const codigoQr = randomUUID();
   const { error } = await admin.from("tickets").insert({
     ticket_type_id: cortesiaLote.id,
@@ -347,13 +356,46 @@ export async function gerarCortesia(_prevState: FormState, formData: FormData): 
     titular_nome: titularNome || null,
     titular_cpf: titularCpf || null,
     intransferivel,
+    profile_id: vinculadoProfileId,
     gerado_por: profile.id,
   });
 
   if (error) return { error: error.message };
 
   revalidatePath(`/produtor/eventos/${eventId}`);
-  return { success: "Ingresso cortesia gerado.", codigoQr };
+  return {
+    success: vinculadoProfileId
+      ? "Ingresso cortesia gerado e vinculado à conta do titular."
+      : "Ingresso cortesia gerado. Esse CPF ainda não tem conta — vincule depois se quiser.",
+    codigoQr,
+  };
+}
+
+/** Vincula (ou revincula) um ingresso já existente à conta de um CPF cadastrado. */
+export async function transferirIngresso(_prevState: FormState, formData: FormData): Promise<FormState> {
+  const ticketId = String(formData.get("ticket_id") ?? "");
+  const cpf = onlyDigits(String(formData.get("cpf") ?? ""));
+  const { producer } = await requireProducer();
+  const admin = createAdminClient();
+
+  if (cpf.length !== 11) return { error: "Informe um CPF válido (11 dígitos)." };
+
+  const { data: ticket } = await admin.from("tickets").select("*, events!inner(producer_id)").eq("id", ticketId).single();
+  const producerIdDoTicket = (ticket?.events as unknown as { producer_id: string } | null)?.producer_id;
+  if (!ticket || producerIdDoTicket !== producer.id) return { error: "Ingresso não encontrado." };
+
+  const { data: perfil } = await admin.from("profiles").select("id, nome").eq("cpf", cpf).maybeSingle();
+  if (!perfil) return { error: "Nenhuma conta encontrada com esse CPF." };
+
+  const { error } = await admin
+    .from("tickets")
+    .update({ profile_id: perfil.id, titular_cpf: cpf, titular_nome: ticket.titular_nome ?? perfil.nome })
+    .eq("id", ticketId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/produtor/eventos/${ticket.event_id}`);
+  return { success: `Ingresso vinculado à conta de ${perfil.nome}.` };
 }
 
 export async function criarValidator(_prevState: FormState, formData: FormData): Promise<FormState> {

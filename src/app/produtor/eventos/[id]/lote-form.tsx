@@ -12,7 +12,7 @@ export function LoteForm({ eventId }: { eventId: string }) {
   const [state, formAction, pending] = useActionState(criarLote, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-dashed border-[var(--border-2)] p-4">
+    <form action={formAction} className="flex flex-col gap-3 rounded-[14px] border border-dashed border-[#3d4a63] p-4">
       <input type="hidden" name="event_id" value={eventId} />
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">

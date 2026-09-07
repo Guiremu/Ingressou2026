@@ -116,6 +116,7 @@ export interface Ticket {
   titular_nome: string | null;
   titular_cpf: string | null;
   intransferivel: boolean;
+  profile_id: string | null;
   gerado_por: string | null;
   criado_em: string;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { atualizarEvento, type FormState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,16 +18,7 @@ function toInputDateTime(value: string | null) {
 }
 
 export function EventEditForm({ event }: { event: EventRow }) {
-  const [aberto, setAberto] = useState(false);
   const [state, formAction, pending] = useActionState(atualizarEvento, initialState);
-
-  if (!aberto) {
-    return (
-      <Button type="button" variant="outline" onClick={() => setAberto(true)}>
-        Editar dados do evento
-      </Button>
-    );
-  }
 
   return (
     <form action={formAction} className="flex flex-col gap-4" encType="multipart/form-data">
@@ -119,14 +110,9 @@ export function EventEditForm({ event }: { event: EventRow }) {
       {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
       {state.success && <p className="text-sm text-[var(--success)]">{state.success}</p>}
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Salvando..." : "Salvar alterações"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => setAberto(false)}>
-          Fechar
-        </Button>
-      </div>
+      <Button type="submit" disabled={pending} className="self-start">
+        {pending ? "Salvando..." : "Salvar alterações"}
+      </Button>
     </form>
   );
 }

@@ -15,9 +15,9 @@ export function CortesiaForm({ eventId }: { eventId: string }) {
   const [intransferivel, setIntransferivel] = useState(true);
 
   return (
-    <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-dashed border-[var(--border-2)] p-4">
+    <form action={formAction} className="flex flex-col gap-3 rounded-[14px] border border-dashed border-[#3d4a63] p-4">
       <input type="hidden" name="event_id" value={eventId} />
-      <p className="text-xs text-[var(--text-dim)]">
+      <p className="text-xs text-[#93a0b8]">
         Cada cortesia é gerada individualmente, com o titular dela. Pra outra pessoa, gere de novo.
       </p>
 
@@ -27,7 +27,7 @@ export function CortesiaForm({ eventId }: { eventId: string }) {
           type="checkbox"
           checked={intransferivel}
           onChange={(e) => setIntransferivel(e.target.checked)}
-          className="h-4 w-4 rounded border-[var(--border-2)]"
+          className="h-4 w-4 rounded border-[#3d4a63]"
         />
         <input type="hidden" name="intransferivel" value={intransferivel ? "1" : ""} />
         <Label htmlFor="cortesia_intransferivel" className="cursor-pointer">
@@ -45,6 +45,9 @@ export function CortesiaForm({ eventId }: { eventId: string }) {
           <Input id="cortesia_titular_cpf" name="titular_cpf" inputMode="numeric" required={intransferivel} />
         </div>
       </div>
+      <p className="text-xs text-[#5d6b84]">
+        Se o CPF já tiver uma conta na ingressou, o ingresso já cai direto em &quot;Meus ingressos&quot; dela.
+      </p>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">

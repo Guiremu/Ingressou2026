@@ -12,7 +12,7 @@ export function ValidatorForm({ eventId }: { eventId: string }) {
   const [state, formAction, pending] = useActionState(criarValidator, initialState);
 
   return (
-    <form action={formAction} className="flex flex-wrap items-end gap-3 rounded-lg border border-dashed border-[var(--border-2)] p-4">
+    <form action={formAction} className="flex flex-wrap items-end gap-3 rounded-[14px] border border-dashed border-[#3d4a63] p-4">
       <input type="hidden" name="event_id" value={eventId} />
       <div className="flex flex-col gap-1">
         <Label htmlFor="val_nome">Identificação</Label>
