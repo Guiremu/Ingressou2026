@@ -52,13 +52,13 @@ export async function SiteHeader() {
             </>
           ) : (
             <>
-              <Link href="/login" className="text-sm text-[var(--text-muted-2)] hover:text-white">
-                Entrar
-              </Link>
               <Link
-                href="/cadastro/produtor"
+                href="/login"
                 className="rounded-full bg-[var(--accent)] px-[18px] py-2.5 text-[13px] font-bold text-[var(--accent-foreground)]"
               >
+                Entrar
+              </Link>
+              <Link href="/cadastro/produtor" className="text-sm text-[var(--text-muted-2)] hover:text-white">
                 Sou produtor
               </Link>
             </>

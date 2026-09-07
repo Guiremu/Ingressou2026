@@ -63,13 +63,17 @@ export function MobileNav({ profile }: { profile: MobileNavProfile | null }) {
               </>
             ) : (
               <>
-                <Link href="/login" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 text-[var(--text-muted-2)]">
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full bg-[var(--accent)] px-[18px] py-2.5 text-center text-[13px] font-bold text-[var(--accent-foreground)]"
+                >
                   Entrar
                 </Link>
                 <Link
                   href="/cadastro/produtor"
                   onClick={() => setOpen(false)}
-                  className="mt-1 rounded-full bg-[var(--accent)] px-[18px] py-2.5 text-center text-[13px] font-bold text-[var(--accent-foreground)]"
+                  className="mt-1 rounded-lg px-2 py-2.5 text-center text-[var(--text-muted-2)]"
                 >
                   Sou produtor
                 </Link>
