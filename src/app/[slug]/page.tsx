@@ -71,64 +71,66 @@ export default async function ProducerPage({
     <div className="flex flex-1 flex-col">
       <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8">
-        <div className="relative h-[168px] w-full overflow-hidden rounded-b-[24px] bg-[linear-gradient(120deg,#2A1B66_0%,#7C5CFF_60%,#FF4D8D_120%)]">
-          {producer.banner_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={producer.banner_url} alt="" className="h-full w-full object-cover" />
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-end justify-between gap-4 px-1">
-          <div className="flex items-end gap-4">
-            {producer.logo_url ? (
+        <div className="overflow-hidden rounded-[24px] border border-[var(--border)] bg-[#0e0e16]">
+          <div className="relative h-[168px] w-full bg-[linear-gradient(120deg,#2A1B66_0%,#7C5CFF_60%,#FF4D8D_120%)]">
+            {producer.banner_url && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={producer.logo_url}
-                alt={nome}
-                className="-mt-[34px] h-[84px] w-[84px] flex-none rounded-[20px] border-2 border-[#0e0e16] object-cover"
-              />
-            ) : (
-              <div className="-mt-[34px] flex h-[84px] w-[84px] flex-none items-center justify-center rounded-[20px] border-2 border-[#0e0e16] bg-[var(--surface)] font-[var(--font-sora)] text-[26px] font-extrabold text-[var(--accent)]">
-                {nome.charAt(0).toUpperCase()}
-              </div>
+              <img src={producer.banner_url} alt="" className="h-full w-full object-cover" />
             )}
-            <div className="flex flex-col gap-1 pb-1">
-              <div className="flex items-center gap-2">
-                <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">{nome}</h1>
-                <span className="rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/12 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
-                  Verificado
-                </span>
-              </div>
-              <p className="text-[13px] text-[var(--text-muted-2)]">
-                {producer.cidade ?? "—"} · {(encerradosCount ?? 0) + (proximosCount ?? 0)} eventos realizados
-              </p>
-            </div>
           </div>
-          <button className="self-center rounded-full bg-[var(--accent)] px-5 py-2.5 text-[13px] font-bold text-[var(--accent-foreground)]">
-            Seguir produtor
-          </button>
-        </div>
 
-        {producer.descricao && (
-          <p className="mt-4 max-w-[620px] px-1 text-sm leading-relaxed text-[var(--text-muted-2)]">
-            {producer.descricao}
-          </p>
-        )}
+          <div className="flex flex-wrap items-end justify-between gap-4 px-5 pb-5">
+            <div className="flex items-end gap-4">
+              {producer.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={producer.logo_url}
+                  alt={nome}
+                  className="-mt-[38px] h-[88px] w-[88px] flex-none rounded-full border-[3px] border-[#0e0e16] object-cover shadow-lg shadow-black/40"
+                />
+              ) : (
+                <div className="-mt-[38px] flex h-[88px] w-[88px] flex-none items-center justify-center rounded-full border-[3px] border-[#0e0e16] bg-[linear-gradient(135deg,var(--accent)_0%,#7C5CFF_140%)] font-[var(--font-sora)] text-[30px] font-extrabold text-[#07070b] shadow-lg shadow-black/40">
+                  {nome.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex flex-col gap-1.5 pb-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">{nome}</h1>
+                  <span className="rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/12 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
+                    Verificado
+                  </span>
+                </div>
+                <p className="text-[13px] text-[var(--text-muted-2)]">
+                  {producer.cidade ?? "—"} · {(encerradosCount ?? 0) + (proximosCount ?? 0)} eventos realizados
+                </p>
+              </div>
+            </div>
+            <button className="self-center rounded-full bg-[var(--accent)] px-5 py-2.5 text-[13px] font-bold text-[var(--accent-foreground)]">
+              Seguir produtor
+            </button>
+          </div>
 
-        <div className="mt-3.5 flex gap-5 border-b border-[var(--border)] px-1">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.key}
-              href={`?aba=${tab.key}`}
-              className={`pb-3 text-sm ${
-                abaAtiva === tab.key
-                  ? "font-bold text-white shadow-[inset_0_-2px_0_var(--accent)]"
-                  : "text-[var(--text-muted-2)]"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
+          {producer.descricao && (
+            <p className="max-w-[620px] px-5 pb-5 text-sm leading-relaxed text-[var(--text-muted-2)]">
+              {producer.descricao}
+            </p>
+          )}
+
+          <div className="flex gap-5 border-t border-[var(--border)] px-5">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.key}
+                href={`?aba=${tab.key}`}
+                className={`pb-3 pt-3.5 text-sm ${
+                  abaAtiva === tab.key
+                    ? "font-bold text-white shadow-[inset_0_-2px_0_var(--accent)]"
+                    : "text-[var(--text-muted-2)]"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {abaAtiva === "sobre" ? (
