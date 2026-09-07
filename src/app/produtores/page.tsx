@@ -25,7 +25,7 @@ export default async function ProdutoresPage() {
               <Link
                 key={p.slug}
                 href={`/${p.slug}`}
-                className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition-colors hover:border-[var(--border-2)]"
+                className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:border-[var(--border-2)]"
               >
                 {p.logo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element

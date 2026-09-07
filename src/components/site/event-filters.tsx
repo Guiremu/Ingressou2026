@@ -37,7 +37,7 @@ export function EventFilters({ categorias, cidades }: { categorias: string[]; ci
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-label="Filtros"
-          className={`relative flex h-10 w-10 flex-none items-center justify-center rounded-xl border transition-colors ${
+          className={`relative flex h-10 w-10 flex-none items-center justify-center rounded-xl border transition ${
             open || temFiltro
               ? "border-[var(--accent)] text-[var(--accent)]"
               : "border-[var(--border)] text-[var(--text-muted-2)]"

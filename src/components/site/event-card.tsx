@@ -25,7 +25,7 @@ export function EventCard({ event }: { event: EventCardData }) {
   return (
     <Link
       href={`/${event.producerSlug}/${event.eventSlug}`}
-      className="group flex flex-col overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--surface)] transition-colors hover:border-[var(--border-2)]"
+      className="group flex flex-col overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--surface)] transition hover:border-[var(--border-2)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--surface-4)]">
         {event.imagem_url ? (

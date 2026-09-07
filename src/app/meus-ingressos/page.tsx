@@ -73,7 +73,7 @@ export default async function MeusIngressosPage() {
 
             return (
               <Link key={t.id} href={`/ingresso/${t.codigo_qr}`}>
-                <Card className="transition-colors hover:border-[var(--accent)]/40">
+                <Card className="transition hover:border-[var(--accent)]/40">
                   <CardContent className="flex flex-wrap items-center gap-4 p-4">
                     <div className="h-16 w-16 flex-none overflow-hidden rounded-xl bg-[var(--surface-4)]">
                       {event?.imagem_url && (

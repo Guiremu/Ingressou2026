@@ -37,7 +37,7 @@ export default async function EventosPage() {
           <Link
             key={event.id}
             href={`/produtor/eventos/${event.id}`}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#263041] bg-[#121722] p-4 transition-colors hover:border-[#3d4a63]"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#263041] bg-[#121722] p-4 transition hover:border-[#3d4a63]"
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-white">{event.titulo}</p>

@@ -59,3 +59,25 @@ input:-webkit-autofill:focus {
   box-shadow: 0 0 0px 1000px var(--surface-4) inset;
   transition: background-color 9999s ease-in-out 0s;
 }
+
+/* Feedback tátil global: todo botão/link "encolhe" um pouco ao ser pressionado, pra dar
+   a sensação de que o clique/toque realmente aconteceu — cobre também elementos que não
+   usam o componente <Button> (abas, botões +/-, cards inteiros virando <Link>, etc). Em
+   @layer base pra não brigar com utilities de transition-* do Tailwind (@layer utilities
+   sempre vence sobre @layer base, então isso só preenche a lacuna quando nada mais define
+   transition-property). */
+@layer base {
+  button:not(:disabled),
+  a[href] {
+    transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):active,
+  a[href]:active {
+    transform: scale(0.97);
+  }
+}

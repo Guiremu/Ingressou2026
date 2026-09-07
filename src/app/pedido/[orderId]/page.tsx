@@ -94,7 +94,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ orderId
                 <Link
                   key={t.id}
                   href={`/ingresso/${t.codigo_qr}`}
-                  className="flex items-center justify-between gap-3 rounded-[14px] border border-[var(--border-2)] bg-[var(--surface)] px-4 py-3.5 transition-colors hover:border-[var(--accent)]/40"
+                  className="flex items-center justify-between gap-3 rounded-[14px] border border-[var(--border-2)] bg-[var(--surface)] px-4 py-3.5 transition hover:border-[var(--accent)]/40"
                 >
                   <p className="text-sm font-semibold text-white">
                     {(t.ticket_types as unknown as { nome: string } | null)?.nome}
