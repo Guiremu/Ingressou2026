@@ -441,6 +441,15 @@ promover alguém a admin.
 5. **`Uint8Array` do `pdf-lib` (`pdfDoc.save()`) não é atribuível direto a `BodyInit`** em
    versões recentes de TS/lib DOM — envolver em `Buffer.from(bytes)` resolve.
 6. **`ImageResponse`/rotas com JSX precisam de extensão `.tsx`**, não `.ts` (erro de parse).
+7. **`finalizePaidOrder` (`src/lib/orders.ts`) inseria o ticket sem `codigo_qr`/
+   `assinatura_hmac`** (colunas `NOT NULL` sem default útil pro HMAC) e sem checar erro do
+   insert — o insert falhava silenciosamente, o pedido ficava `pago` mas **zero ingressos**
+   eram gerados (sumia de "Meus ingressos" mesmo com pagamento aprovado). Só apareceu com
+   os ingressos gratuitos (primeira vez que esse caminho rodou de ponta a ponta de verdade —
+   os pedidos "pix" antigos usados nos testes eram todos de seed, que já inseria os tickets
+   prontos). Corrigido gerando `codigo_qr` (`randomUUID()`) e assinando (`signTicket`) antes
+   de um único insert, mesmo padrão da geração de cortesia. 5 pedidos gratuitos afetados
+   nesta sessão foram corrigidos via backfill direto no banco.
 
 ## 12. Performance / streaming (trabalho de "deixar o site mais liso")
 
