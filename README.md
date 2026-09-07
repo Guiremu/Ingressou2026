@@ -92,10 +92,11 @@ aprovado imediatamente.
 
 - Plataforma: sempre 3% fixo sobre o valor do ingresso (`platform_config`, editável pelo Gestor
   ADM em `/admin/taxas`).
-- À vista (PIX ou crédito 1x): a taxa do Mercado Pago é descontada do produtor, junto dos 3% da
-  plataforma.
-- Parcelado (2x+): o acréscimo do parcelamento é somado ao valor cobrado do cliente, sem afetar
-  o repasse do produtor nem o lucro da plataforma (ver `calculateSplit` em `src/lib/mercadopago.ts`).
+- A taxa do Mercado Pago (PIX ou parcelamento) e os 3% da plataforma são sempre somados ao valor
+  cobrado do comprador, de forma 100% transparente (linhas separadas no resumo do checkout) —
+  nunca descontados do produtor. O produtor sempre recebe o valor cheio dos ingressos; a
+  plataforma sempre recebe exatamente os 3% via `application_fee` (ver `calculateSplit` em
+  `src/lib/split-calc.ts`).
 - A tabela `mp_fee_table` (percentuais de referência do MP por método/parcela) é editável pelo
   Gestor ADM e deve ser ajustada conforme o contrato real da conta MP da plataforma.
 

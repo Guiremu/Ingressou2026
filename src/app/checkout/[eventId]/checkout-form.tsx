@@ -371,15 +371,14 @@ export function CheckoutForm({
                       })}
                     </div>
 
-                    {parcelas > 1 && (
-                      <div className="flex items-start gap-2.5 rounded-xl border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-3">
-                        <div className="mt-0.5 h-4 w-4 flex-none rounded-full bg-[var(--warning)]" />
-                        <p className="text-xs leading-relaxed text-[#fde68a]">
-                          Em {parcelas}x o acréscimo de parcelamento é repassado a você. Total {formatCurrency(split.valorTotalCobrado)} — {parcelas} parcelas de{" "}
-                          {formatCurrency(split.valorTotalCobrado / parcelas)}.
-                        </p>
-                      </div>
-                    )}
+                    <div className="flex items-start gap-2.5 rounded-xl border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-3">
+                      <div className="mt-0.5 h-4 w-4 flex-none rounded-full bg-[var(--warning)]" />
+                      <p className="text-xs leading-relaxed text-[#fde68a]">
+                        Taxa da plataforma ({formatCurrency(split.taxaPlataforma)}) + taxa do Mercado Pago em {parcelas}x (
+                        {formatCurrency(split.taxaMp)}) já somadas no total. {parcelas}x de{" "}
+                        {formatCurrency(split.valorTotalCobrado / parcelas)} = {formatCurrency(split.valorTotalCobrado)}.
+                      </p>
+                    </div>
                   </div>
                 )}
 
@@ -387,7 +386,8 @@ export function CheckoutForm({
                   <div className="flex items-start gap-2.5 rounded-xl border border-[var(--success)]/28 bg-[var(--success)]/10 p-3">
                     <div className="mt-0.5 h-4 w-4 flex-none rounded-full bg-[var(--success)]" />
                     <p className="text-xs leading-relaxed text-[#a7f3d0]">
-                      No PIX não há acréscimo de parcelamento. O QR de pagamento aparece na próxima tela.
+                      Taxa da plataforma ({formatCurrency(split.taxaPlataforma)}) + taxa do PIX no Mercado Pago (
+                      {formatCurrency(split.taxaMp)}) já somadas no total. O QR de pagamento aparece na próxima tela.
                     </p>
                   </div>
                 )}
@@ -412,12 +412,18 @@ export function CheckoutForm({
                 <span className="text-[var(--text-muted-2)]">Subtotal</span>
                 <span className="text-white">{formatCurrency(subtotal)}</span>
               </div>
-              {split.valorTaxaParcelamento > 0 && (
-                <div className="flex justify-between gap-3 text-[13px]">
-                  <span className="text-[var(--text-muted-2)]">Acréscimo de parcelamento</span>
-                  <span className="text-white">{formatCurrency(split.valorTaxaParcelamento)}</span>
-                </div>
-              )}
+              <div className="flex justify-between gap-3 text-[13px]">
+                <span className="text-[var(--text-muted-2)]">
+                  Taxa da plataforma ({(taxaPlataformaPercentual * 100).toFixed(0)}%)
+                </span>
+                <span className="text-white">{formatCurrency(split.taxaPlataforma)}</span>
+              </div>
+              <div className="flex justify-between gap-3 text-[13px]">
+                <span className="text-[var(--text-muted-2)]">
+                  Taxa de processamento (Mercado Pago{metodo === "pix" ? " · PIX" : parcelas > 1 ? ` · ${parcelas}x` : ""})
+                </span>
+                <span className="text-white">{formatCurrency(split.taxaMp)}</span>
+              </div>
             </div>
             <div className="h-px bg-[#262633]" />
             <div className="flex items-baseline justify-between gap-3">

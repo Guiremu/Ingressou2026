@@ -12,11 +12,15 @@ export interface SplitCalculo {
 }
 
 /**
- * Regra de negócio (ver seção 3 da especificação):
- * - À vista (PIX ou crédito 1x): a taxa do MP é descontada do produtor, junto com os 3% da plataforma.
- * - Parcelado (2x+): o acréscimo do parcelamento é somado ao valor cobrado do cliente, sem afetar
- *   o repasse do produtor (que recebe o valor do ingresso menos apenas os 3% da plataforma) nem o
- *   lucro da plataforma (que continua recebendo exatamente 3% do valor original do ingresso).
+ * Regra de negócio: a taxa do Mercado Pago (PIX ou parcelamento) e a taxa da
+ * plataforma (3%) são sempre somadas ao valor cobrado do comprador, de forma 100%
+ * transparente — nunca descontadas do produtor. O produtor sempre recebe o valor
+ * cheio dos ingressos; a plataforma sempre recebe exatamente os 3% via
+ * `application_fee`; o comprador absorve o restante (a taxa do MP).
+ *
+ * Gross-up: valorTotalCobrado é calculado de forma que, depois do MP descontar sua
+ * taxa percentual sobre o total cobrado, sobre exatamente valorIngressos + taxaPlataforma
+ * pra platform+produtor.
  *
  * Função pura (sem I/O) — importada tanto pelo servidor (checkout, webhook) quanto pelo
  * client component do checkout (para exibir o resumo em tempo real antes de submeter).
@@ -28,29 +32,11 @@ export function calculateSplit(params: {
   taxaMpPercentual: number;
   taxaPlataformaPercentual: number;
 }): SplitCalculo {
-  const { valorIngressos, metodoPagamento, parcelas, taxaMpPercentual, taxaPlataformaPercentual } = params;
+  const { valorIngressos, taxaMpPercentual, taxaPlataformaPercentual } = params;
   const taxaPlataforma = round2(valorIngressos * taxaPlataformaPercentual);
-  const aVista = metodoPagamento === "pix" || parcelas <= 1;
 
-  if (aVista) {
-    const taxaMp = round2(valorIngressos * taxaMpPercentual);
-    const valorLiquidoProdutor = round2(valorIngressos - taxaMp - taxaPlataforma);
-    return {
-      valorIngressos,
-      valorTaxaParcelamento: 0,
-      valorTotalCobrado: valorIngressos,
-      taxaMp,
-      taxaPlataforma,
-      valorLiquidoProdutor,
-      applicationFee: taxaPlataforma,
-    };
-  }
-
-  // Gross-up: o cliente absorve integralmente a taxa de parcelamento do MP sobre o total cobrado,
-  // de forma que produtor e plataforma dividam o valor original do ingresso sem perdas.
-  const valorTotalCobrado = round2(valorIngressos / (1 - taxaMpPercentual));
-  const taxaMp = round2(valorTotalCobrado - valorIngressos);
-  const valorLiquidoProdutor = round2(valorIngressos - taxaPlataforma);
+  const valorTotalCobrado = round2((valorIngressos + taxaPlataforma) / (1 - taxaMpPercentual));
+  const taxaMp = round2(valorTotalCobrado - valorIngressos - taxaPlataforma);
 
   return {
     valorIngressos,
@@ -58,7 +44,7 @@ export function calculateSplit(params: {
     valorTotalCobrado,
     taxaMp,
     taxaPlataforma,
-    valorLiquidoProdutor,
+    valorLiquidoProdutor: valorIngressos,
     applicationFee: taxaPlataforma,
   };
 }
