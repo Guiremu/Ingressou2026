@@ -3,8 +3,10 @@ import Link from "next/link";
 import QRCode from "qrcode";
 import { buildGoogleWalletSaveUrl } from "@/lib/google-wallet";
 import { getTicketViewData } from "@/lib/ticket-view";
+import { createClient } from "@/lib/supabase/server";
 import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { ShareTicketButton } from "@/components/site/share-ticket-button";
+import { TransferirIngressoForm } from "./transferir-ingresso-form";
 import { formatDate } from "@/lib/utils";
 
 export default async function IngressoPage({ params }: { params: Promise<{ codigoQr: string }> }) {
@@ -12,7 +14,14 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
   const view = await getTicketViewData(codigoQr);
   if (!view) notFound();
 
-  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload } = view;
+  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload, donoAtual } = view;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isOwner = Boolean(user && donoAtual && user.id === donoAtual);
+  const podeTransferir = isOwner && !ticket.intransferivel && ticket.status === "valido";
 
   const qrDataUrl = await QRCode.toDataURL(qrPayload, { width: 320, margin: 1 });
 
@@ -149,6 +158,9 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
             <span className="h-[18px] w-[18px] rounded-[5px] bg-[var(--border-2)]" />
             Apple Wallet · em breve
           </div>
+
+          {podeTransferir && <TransferirIngressoForm codigoQr={codigoQr} />}
+
           <Link
             href={event?.cidade ? `/?cidade=${encodeURIComponent(event.cidade)}` : "/"}
             className="p-1.5 text-center text-[13px] text-[var(--text-dim)]"

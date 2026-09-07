@@ -227,6 +227,23 @@ criaram e depois removeram uma função `find_profile_by_cpf` só pra isso; a ú
 de mandar ingresso pra outra pessoa é exportar/compartilhar depois da compra, ou — só no
 caso de cortesia gerada pelo produtor — vincular direto por CPF, ver seção 9.3).
 
+Além disso, desde a migração `0015`, o titular pode transferir o próprio ingresso pra
+outra conta já cadastrada (autoatendimento, sem passar pelo produtor) — formulário
+"Transferir ingresso" em `/ingresso/[codigoQr]` (`transferir-ingresso-form.tsx` +
+`transferirIngressoAutoatendimento` em `actions.ts`), só visível pro dono logado, só
+funciona pra ingresso `valido` e não-`intransferivel`, exige o CPF de uma conta já
+cadastrada. A policy de leitura de `tickets` foi ajustada na mesma migração: antes o
+comprador original continuava enxergando o ingresso pra sempre via `order_id` mesmo depois
+de transferido; agora esse vínculo só vale enquanto `profile_id` estiver nulo (ou seja,
+assim que alguém transfere, o vínculo por `order_id` some pro ex-titular).
+
+`/meus-ingressos` foi reescrita pra listar **ingressos individuais** direto (não mais
+pedidos agrupados) — cada card já abre `/ingresso/[codigoQr]` num clique só, sem passar
+por `/pedido/[orderId]`. Badge de status só aparece quando não é `valido` (usado/cancelado)
+— **"pago" não aparece mais**, por decisão do usuário ("se tá ali é que tá pago"). Pedidos
+sem ingresso ainda (pendente) ou que não vingaram (cancelado/estornado) ficam numa seção
+separada "Outros pedidos", que ainda linka pra `/pedido/[orderId]`.
+
 ## 8. Regra de taxas (Mercado Pago + plataforma) — **sempre no comprador, sempre visível**
 
 Decisão de negócio final (corrigida depois de uma versão anterior que descontava do
