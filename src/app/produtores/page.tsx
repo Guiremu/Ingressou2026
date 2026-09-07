@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 
 export default async function ProdutoresPage() {
   const supabase = await createClient();
@@ -13,7 +13,7 @@ export default async function ProdutoresPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">Produtores</h1>
         <p className="mt-1 text-[var(--text-muted)]">Organizadores de eventos na plataforma.</p>

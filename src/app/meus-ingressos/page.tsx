@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireLogin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -22,7 +22,7 @@ export default async function MeusIngressosPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
         <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">
           Meus ingressos

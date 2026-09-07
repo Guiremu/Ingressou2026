@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { SiteFooter } from "@/components/site/site-footer";
 import { EventCard } from "@/components/site/event-card";
 import { EventFilters } from "@/components/site/event-filters";
@@ -36,16 +36,22 @@ export default async function VitrinePage({
   const { data: events } = await query;
   const rows = (events ?? []) as unknown as EventListRow[];
 
-  const { data: precos } = rows.length
-    ? await supabase
-        .from("ticket_types")
-        .select("event_id, preco")
-        .in(
-          "event_id",
-          rows.map((r) => r.id),
-        )
-        .eq("tipo", "pago")
-    : { data: [] };
+  // precos, cidades e categorias não dependem umas das outras (só de `rows`/status publicado) —
+  // rodam em paralelo em vez de esperar uma pela outra.
+  const [{ data: precos }, { data: cidadesData }, { data: categoriasData }] = await Promise.all([
+    rows.length
+      ? supabase
+          .from("ticket_types")
+          .select("event_id, preco")
+          .in(
+            "event_id",
+            rows.map((r) => r.id),
+          )
+          .eq("tipo", "pago")
+      : Promise.resolve({ data: [] as { event_id: string; preco: number }[] }),
+    supabase.from("events").select("cidade").eq("status", "publicado").not("cidade", "is", null),
+    supabase.from("events").select("categoria").eq("status", "publicado").not("categoria", "is", null),
+  ]);
 
   const precoMinimoPorEvento = new Map<string, number>();
   for (const p of precos ?? []) {
@@ -53,23 +59,12 @@ export default async function VitrinePage({
     if (atual === undefined || Number(p.preco) < atual) precoMinimoPorEvento.set(p.event_id, Number(p.preco));
   }
 
-  const { data: cidadesData } = await supabase
-    .from("events")
-    .select("cidade")
-    .eq("status", "publicado")
-    .not("cidade", "is", null);
-  const { data: categoriasData } = await supabase
-    .from("events")
-    .select("categoria")
-    .eq("status", "publicado")
-    .not("categoria", "is", null);
-
   const cidades = [...new Set((cidadesData ?? []).map((e) => e.cidade as string))].sort();
   const categorias = [...new Set((categoriasData ?? []).map((e) => e.categoria as string))].sort();
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <p className="text-xs font-bold uppercase tracking-wider text-[var(--accent)]">Ariquemes · RO</p>
         <h1 className="mt-2 font-[var(--font-sora)] text-[34px] font-extrabold leading-[1.05] tracking-tight text-white">

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
@@ -30,7 +30,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ orderId
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
         <h1 className="font-[var(--font-sora)] text-2xl font-extrabold tracking-tight text-white">
           Pedido de {order.comprador_nome}

@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildQrPayload } from "@/lib/qr-payload";
 import { buildGoogleWalletSaveUrl } from "@/lib/google-wallet";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { ShareTicketButton } from "@/components/site/share-ticket-button";
 import { formatDate } from "@/lib/utils";
 
@@ -65,7 +65,7 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto flex w-full max-w-[460px] flex-1 flex-col gap-3.5 px-4 py-8">
         <div className="overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface)]">
           <div className="flex flex-col gap-1.5 bg-[linear-gradient(135deg,#7C5CFF_0%,#2A1B66_60%,#FF4D8D_130%)] p-5">

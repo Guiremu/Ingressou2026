@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireLogin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { CheckoutForm, type LoteCarrinho, type FeeTable } from "./checkout-form";
 
 export default async function CheckoutPage({
@@ -41,14 +41,19 @@ export default async function CheckoutPage({
 
   if (!event) notFound();
 
-  const { data: ticketTypes } = await supabase
-    .from("ticket_types")
-    .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
-    .eq("event_id", eventId)
-    .in(
-      "id",
-      selecao.map((s) => s.ticketTypeId),
-    );
+  // As três só dependem de `event` já resolvido, não umas das outras — em paralelo.
+  const [{ data: ticketTypes }, { data: feeRows }, { data: platformConfig }] = await Promise.all([
+    supabase
+      .from("ticket_types")
+      .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
+      .eq("event_id", eventId)
+      .in(
+        "id",
+        selecao.map((s) => s.ticketTypeId),
+      ),
+    supabase.from("mp_fee_table").select("metodo_pagamento, parcelas, taxa_percentual"),
+    supabase.from("platform_config").select("taxa_plataforma_percentual").eq("id", true).single(),
+  ]);
 
   if (!ticketTypes || ticketTypes.length !== selecao.length) notFound();
 
@@ -64,13 +69,6 @@ export default async function CheckoutPage({
     };
   });
 
-  const { data: feeRows } = await supabase.from("mp_fee_table").select("metodo_pagamento, parcelas, taxa_percentual");
-  const { data: platformConfig } = await supabase
-    .from("platform_config")
-    .select("taxa_plataforma_percentual")
-    .eq("id", true)
-    .single();
-
   const feeTable: FeeTable = { pix: {}, credito: {} };
   for (const row of feeRows ?? []) {
     feeTable[row.metodo_pagamento as "pix" | "credito"][row.parcelas] = Number(row.taxa_percentual);
@@ -80,7 +78,7 @@ export default async function CheckoutPage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <CheckoutForm
         eventId={event.id}
         eventTitulo={event.titulo}

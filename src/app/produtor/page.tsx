@@ -33,19 +33,32 @@ export default async function ProdutorDashboard() {
   const trintaDiasAtras = diasAtrasISO(30);
   const eventIds = (events ?? []).map((e) => e.id);
 
-  const { data: orders } = eventIds.length
-    ? await supabase
-        .from("orders")
-        .select("id, event_id, valor_ingressos, criado_em")
-        .in("event_id", eventIds)
-        .eq("status", "pago")
-        .gte("criado_em", trintaDiasAtras)
-    : { data: [] };
+  // orders e capacidade só dependem de eventIds — em paralelo.
+  const [{ data: orders }, { data: capacidade }] = await Promise.all([
+    eventIds.length
+      ? supabase
+          .from("orders")
+          .select("id, event_id, valor_ingressos, criado_em")
+          .in("event_id", eventIds)
+          .eq("status", "pago")
+          .gte("criado_em", trintaDiasAtras)
+      : Promise.resolve({ data: [] as { id: string; event_id: string; valor_ingressos: number; criado_em: string }[] }),
+    eventIds.length
+      ? supabase.from("ticket_types").select("quantidade_total").in("event_id", eventIds).eq("tipo", "pago")
+      : Promise.resolve({ data: [] as { quantidade_total: number }[] }),
+  ]);
 
   const orderIds = (orders ?? []).map((o) => o.id);
-  const { data: items } = orderIds.length
-    ? await supabase.from("order_items").select("order_id, quantidade").in("order_id", orderIds)
-    : { data: [] };
+
+  // items e splits só dependem de orderIds — em paralelo.
+  const [{ data: items }, { data: splits }] = await Promise.all([
+    orderIds.length
+      ? supabase.from("order_items").select("order_id, quantidade").in("order_id", orderIds)
+      : Promise.resolve({ data: [] as { order_id: string; quantidade: number }[] }),
+    orderIds.length
+      ? supabase.from("payment_splits").select("valor_liquido_produtor").in("order_id", orderIds)
+      : Promise.resolve({ data: [] as { valor_liquido_produtor: number }[] }),
+  ]);
 
   const qtdPorOrder = new Map<string, number>();
   for (const item of items ?? []) {
@@ -54,15 +67,7 @@ export default async function ProdutorDashboard() {
 
   const vendasNoPeriodo = (orders ?? []).reduce((acc, o) => acc + Number(o.valor_ingressos), 0);
   const ingressosVendidos = [...qtdPorOrder.values()].reduce((a, b) => a + b, 0);
-
-  const { data: splits } = orderIds.length
-    ? await supabase.from("payment_splits").select("valor_liquido_produtor").in("order_id", orderIds)
-    : { data: [] };
   const saldoAReceber = (splits ?? []).reduce((acc, s) => acc + Number(s.valor_liquido_produtor), 0);
-
-  const { data: capacidade } = eventIds.length
-    ? await supabase.from("ticket_types").select("quantidade_total").in("event_id", eventIds).eq("tipo", "pago")
-    : { data: [] };
   const capacidadeTotal = (capacidade ?? []).reduce((acc, c) => acc + c.quantidade_total, 0);
   const conversao = capacidadeTotal > 0 ? (ingressosVendidos / capacidadeTotal) * 100 : 0;
 

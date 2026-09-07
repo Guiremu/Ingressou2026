@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { TicketSelector } from "./ticket-selector";
@@ -52,7 +52,7 @@ export default async function EventPage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
         <div className="relative aspect-[21/9] min-h-[200px] w-full overflow-hidden rounded-[24px] bg-[var(--surface-4)]">
           {event.imagem_url ? (

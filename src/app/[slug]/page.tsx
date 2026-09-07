@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { SiteHeader } from "@/components/site/site-header";
+import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { SiteFooter } from "@/components/site/site-footer";
 import { EventCard } from "@/components/site/event-card";
 
@@ -26,30 +27,29 @@ export default async function ProducerPage({
   if (!producer) notFound();
 
   const nome = producer.nome_fantasia ?? producer.razao_social;
-
-  const { count: encerradosCount } = await supabase
-    .from("events")
-    .select("*", { count: "exact", head: true })
-    .eq("producer_id", producer.id)
-    .eq("status", "encerrado");
-
   const statusFiltro = abaAtiva === "encerrados" ? "encerrado" : "publicado";
 
-  const { data: events } =
+  // As três só dependem de producer.id (já resolvido) — rodam em paralelo.
+  const [{ count: encerradosCount }, { data: events }, { count: proximosCount }] = await Promise.all([
+    supabase
+      .from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("producer_id", producer.id)
+      .eq("status", "encerrado"),
     abaAtiva === "sobre"
-      ? { data: [] }
-      : await supabase
+      ? Promise.resolve({ data: [] as { id: string; titulo: string; imagem_url: string | null; categoria: string | null; cidade: string | null; data_inicio: string; slug: string }[] })
+      : supabase
           .from("events")
           .select("id, titulo, imagem_url, categoria, cidade, data_inicio, slug")
           .eq("producer_id", producer.id)
           .eq("status", statusFiltro)
-          .order("data_inicio", { ascending: abaAtiva === "proximos" });
-
-  const { count: proximosCount } = await supabase
-    .from("events")
-    .select("*", { count: "exact", head: true })
-    .eq("producer_id", producer.id)
-    .eq("status", "publicado");
+          .order("data_inicio", { ascending: abaAtiva === "proximos" }),
+    supabase
+      .from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("producer_id", producer.id)
+      .eq("status", "publicado"),
+  ]);
 
   const eventIds = (events ?? []).map((e) => e.id);
   const { data: precos } = eventIds.length
@@ -69,7 +69,7 @@ export default async function ProducerPage({
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader />
+      <SiteHeaderAsync />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8">
         <div className="relative h-[168px] w-full overflow-hidden rounded-b-[24px] bg-[linear-gradient(120deg,#2A1B66_0%,#7C5CFF_60%,#FF4D8D_120%)]">
           {producer.banner_url && (
@@ -117,7 +117,7 @@ export default async function ProducerPage({
 
         <div className="mt-3.5 flex gap-5 border-b border-[var(--border)] px-1">
           {tabs.map((tab) => (
-            <a
+            <Link
               key={tab.key}
               href={`?aba=${tab.key}`}
               className={`pb-3 text-sm ${
@@ -127,7 +127,7 @@ export default async function ProducerPage({
               }`}
             >
               {tab.label}
-            </a>
+            </Link>
           ))}
         </div>
 

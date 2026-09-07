@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import Script from "next/script";
 import { criarPedido, type CheckoutState } from "./actions";
 import { calculateSplit } from "@/lib/split-calc";
@@ -133,9 +134,9 @@ export function CheckoutForm({
         <div className="w-full rounded-2xl border border-[var(--success)]/30 bg-[var(--success)]/10 p-6 text-center">
           <p className="font-[var(--font-sora)] font-bold text-[var(--success)]">Pagamento aprovado!</p>
           <p className="mt-2 text-sm text-[var(--text-muted-2)]">Seus ingressos já foram gerados.</p>
-          <a href={`/pedido/${state.orderId}`} className="mt-4 inline-block font-medium text-[var(--accent)] underline">
+          <Link href={`/pedido/${state.orderId}`} className="mt-4 inline-block font-medium text-[var(--accent)] underline">
             Ver meus ingressos
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -161,9 +162,9 @@ export function CheckoutForm({
           />
           <p className="mt-4 text-sm text-[var(--text-muted)]">
             Assim que o pagamento for confirmado, seus ingressos aparecerão em{" "}
-            <a href={`/pedido/${state.orderId}`} className="text-[var(--accent)] underline">
+            <Link href={`/pedido/${state.orderId}`} className="text-[var(--accent)] underline">
               meus ingressos
-            </a>
+            </Link>
             .
           </p>
         </div>
