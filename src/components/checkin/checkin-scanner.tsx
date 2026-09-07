@@ -19,6 +19,7 @@ interface Resultado {
   titularNome?: string | null;
   titularCpf?: string | null;
   intransferivel?: boolean;
+  impressoCount?: number;
 }
 
 const RESULT_STYLES = {
@@ -107,6 +108,7 @@ export function CheckinScanner({
               titularNome: row.titular_nome,
               titularCpf: row.titular_cpf,
               intransferivel: row.intransferivel,
+              impressoCount: row.impresso_count,
             });
             if (row.ok) {
               setValidados((v) => v + 1);
@@ -193,6 +195,18 @@ export function CheckinScanner({
                     <br />
                     Titular: {resultado.titularNome ?? "não informado"}
                     {resultado.titularCpf ? ` · CPF ${resultado.titularCpf}` : ""}
+                  </p>
+                </div>
+              )}
+              {resultado.ok && (resultado.impressoCount ?? 0) > 1 && (
+                <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-[rgba(248,113,113,0.4)] bg-[rgba(248,113,113,0.12)] p-3">
+                  <div className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#F87171] text-[13px] font-extrabold text-white">
+                    ⚠
+                  </div>
+                  <p className="text-xs leading-relaxed text-[#fca5a5]">
+                    <span className="font-bold">Alerta de fraude: este ingresso foi impresso mais de uma vez.</span>
+                    <br />
+                    Pode haver mais de uma via em circulação — confira com atenção antes de liberar a entrada.
                   </p>
                 </div>
               )}

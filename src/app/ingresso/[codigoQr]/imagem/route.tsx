@@ -8,7 +8,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
   const view = await getTicketViewData(codigoQr);
   if (!view) return new Response("Ingresso não encontrado.", { status: 404 });
 
-  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload } = view;
+  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload, lojaEmissora } = view;
   const qrDataUrl = await QRCode.toDataURL(qrPayload, { width: 380, margin: 1 });
 
   return new ImageResponse(
@@ -56,6 +56,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
             <span style={{ fontSize: 12, color: "#7a7a8a", fontWeight: 700 }}>PEDIDO</span>
             <span style={{ fontSize: 18, color: "#fff", fontWeight: 700 }}>{numeroPedido}</span>
           </div>
+          {lojaEmissora && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 12, color: "#7a7a8a", fontWeight: 700 }}>EMITIDO POR</span>
+              <span style={{ fontSize: 18, color: "#fff", fontWeight: 700 }}>{lojaEmissora}</span>
+            </div>
+          )}
         </div>
 
         <div

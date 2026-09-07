@@ -14,7 +14,19 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
   const view = await getTicketViewData(codigoQr);
   if (!view) notFound();
 
-  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload, donoAtual } = view;
+  const {
+    ticket,
+    event,
+    loteNome,
+    compradorNome,
+    produtorNome,
+    codigoFormatado,
+    numeroPedido,
+    qrPayload,
+    donoAtual,
+    lojaEmissora,
+    multiplasImpressoes,
+  } = view;
 
   const supabase = await createClient();
   const {
@@ -77,6 +89,12 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
               <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-dim)]">Pedido</p>
               <p className="text-sm font-semibold text-white">{numeroPedido}</p>
             </div>
+            {lojaEmissora && (
+              <div className="col-span-2 flex flex-col gap-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-dim)]">Emitido por</p>
+                <p className="text-sm font-semibold text-white">{lojaEmissora}</p>
+              </div>
+            )}
           </div>
 
           <div className="relative flex h-[22px] items-center">
@@ -86,6 +104,17 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
           </div>
 
           <div className="flex flex-col items-center gap-3.5 px-5 pb-5 pt-2">
+            {multiplasImpressoes && (
+              <div className="flex w-full items-start gap-2.5 rounded-xl border border-[var(--error)]/40 bg-[var(--error)]/12 p-3">
+                <div className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[var(--error)] text-[13px] font-extrabold text-white">
+                  ⚠
+                </div>
+                <p className="text-xs leading-relaxed text-[#fca5a5]">
+                  <span className="font-bold">Este ingresso foi impresso mais de uma vez.</span> Confira com
+                  atenção antes de liberar a entrada — pode haver mais de uma via em circulação.
+                </p>
+              </div>
+            )}
             <div className="w-full max-w-[220px] rounded-2xl bg-white p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrDataUrl} alt="QR Code do ingresso" className="w-full" />

@@ -5,10 +5,11 @@ export interface FinanceiroFiltros {
   status?: string;
   de?: string;
   ate?: string;
+  canal?: "online" | "pdv";
 }
 
 const ORDERS_SELECT =
-  "id, comprador_nome, valor_ingressos, valor_total_cobrado, metodo_pagamento, parcelas, status, criado_em, event_id, payment_splits(taxa_mp, taxa_plataforma, valor_liquido_produtor)";
+  "id, comprador_nome, valor_ingressos, valor_total_cobrado, metodo_pagamento, parcelas, status, criado_em, event_id, canal, forma_pagamento_pdv, payment_splits(taxa_mp, taxa_plataforma, valor_liquido_produtor)";
 
 /** Monta a query de `orders` filtrada, reaproveitada pela página e pelo export CSV. */
 export function buildOrdersQuery(supabase: SupabaseClient, eventIds: string[], filtros: FinanceiroFiltros) {
@@ -19,6 +20,7 @@ export function buildOrdersQuery(supabase: SupabaseClient, eventIds: string[], f
     .order("criado_em", { ascending: false });
 
   if (filtros.status) query = query.eq("status", filtros.status);
+  if (filtros.canal) query = query.eq("canal", filtros.canal);
   if (filtros.de) query = query.gte("criado_em", new Date(filtros.de).toISOString());
   if (filtros.ate) {
     const fim = new Date(filtros.ate);

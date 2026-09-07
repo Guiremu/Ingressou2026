@@ -9,6 +9,8 @@ import { buildOrdersQuery, type FinanceiroFiltros } from "./filtros";
 
 const statusVariant = { pago: "success", pendente: "warning", cancelado: "destructive", estornado: "secondary" } as const;
 
+const formaPagamentoPdvLabel = { dinheiro: "Dinheiro", debito: "Débito", credito: "Crédito", pix: "PIX" } as const;
+
 export default async function FinanceiroPage({ searchParams }: { searchParams: Promise<FinanceiroFiltros> }) {
   const { producer } = await requireProducer();
   const filtros = await searchParams;
@@ -145,10 +147,13 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
                       {eventTitulo.get(o.event_id)} — {formatDate(o.criado_em)}
                     </p>
                     <p className="text-[#5d6b84]">
-                      {o.metodo_pagamento} {o.parcelas > 1 ? `${o.parcelas}x` : "à vista"}
+                      {o.canal === "pdv"
+                        ? formaPagamentoPdvLabel[o.forma_pagamento_pdv as keyof typeof formaPagamentoPdvLabel] ?? "PDV"
+                        : `${o.metodo_pagamento} ${o.parcelas > 1 ? `${o.parcelas}x` : "à vista"}`}
                     </p>
                   </div>
                   <div className="text-right">
+                    <Badge variant="secondary">{o.canal === "pdv" ? "PDV" : "Site"}</Badge>{" "}
                     <Badge variant={statusVariant[o.status as keyof typeof statusVariant]}>{o.status}</Badge>
                     <p className="mt-1 font-medium text-white">{formatCurrency(Number(o.valor_total_cobrado))}</p>
                     {split && (

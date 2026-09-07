@@ -13,11 +13,13 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const url = new URL(request.url);
 
+  const canalParam = url.searchParams.get("canal");
   const filtros: FinanceiroFiltros = {
     evento: url.searchParams.get("evento") ?? undefined,
     status: url.searchParams.get("status") ?? undefined,
     de: url.searchParams.get("de") ?? undefined,
     ate: url.searchParams.get("ate") ?? undefined,
+    canal: canalParam === "online" || canalParam === "pdv" ? canalParam : undefined,
   };
 
   const { data: eventos } = await supabase.from("events").select("id, titulo").eq("producer_id", producer.id);
@@ -30,7 +32,9 @@ export async function GET(request: Request) {
     "evento",
     "comprador",
     "criado_em",
+    "canal",
     "metodo_pagamento",
+    "forma_pagamento_pdv",
     "parcelas",
     "status",
     "valor_ingressos",
@@ -48,7 +52,9 @@ export async function GET(request: Request) {
         eventTitulo.get(o.event_id) ?? "",
         o.comprador_nome,
         o.criado_em,
+        o.canal,
         o.metodo_pagamento,
+        o.forma_pagamento_pdv ?? "",
         o.parcelas,
         o.status,
         o.valor_ingressos,

@@ -9,7 +9,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
   const view = await getTicketViewData(codigoQr);
   if (!view) return NextResponse.json({ error: "Ingresso não encontrado." }, { status: 404 });
 
-  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload } = view;
+  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload, lojaEmissora } = view;
 
   const qrPng = await QRCode.toBuffer(qrPayload, { width: 400, margin: 1 });
 
@@ -40,13 +40,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
   const linha = (rotulo: string, valor: string) => {
     page.drawText(rotulo.toUpperCase(), { x: 20, y, size: 7, font: bold, color: cinza });
     page.drawText(valor, { x: 20, y: y - 12, size: 11, font: regular, color: preto, maxWidth: 280 });
-    y -= 34;
+    y -= 26;
   };
 
   linha("Tipo", loteNome);
   linha("Titular", compradorNome);
   linha("Local", event?.cidade ?? "");
   linha("Pedido", numeroPedido);
+  if (lojaEmissora) linha("Emitido por", lojaEmissora);
 
   const qrImage = await pdfDoc.embedPng(qrPng);
   const qrSize = 180;

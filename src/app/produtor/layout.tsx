@@ -6,6 +6,7 @@ import { ProdutorNavLink } from "@/components/produtor/nav-link";
 const navItems = [
   { href: "/produtor", label: "Visão geral" },
   { href: "/produtor/eventos", label: "Meus eventos" },
+  { href: "/produtor/pdv", label: "Ponto de venda" },
   { href: "/produtor/financeiro", label: "Financeiro" },
   { href: "/produtor/conta", label: "Configurações" },
 ];
@@ -13,6 +14,7 @@ const navItems = [
 const mobileTabs = [
   { href: "/produtor", label: "Visão geral" },
   { href: "/produtor/eventos", label: "Eventos" },
+  { href: "/produtor/pdv", label: "PDV" },
   { href: "/produtor/financeiro", label: "Financeiro" },
   { href: "/produtor/conta", label: "Config." },
 ];

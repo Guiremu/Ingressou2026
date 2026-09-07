@@ -12,6 +12,12 @@ const STATUS_OPCOES = [
   { value: "estornado", label: "Estornado" },
 ];
 
+const CANAL_OPCOES = [
+  { value: "", label: "Todos os canais" },
+  { value: "online", label: "Site" },
+  { value: "pdv", label: "PDV (loja física)" },
+];
+
 export function FinanceiroFilters({ eventos }: { eventos: { id: string; titulo: string }[] }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,6 +52,17 @@ export function FinanceiroFilters({ eventos }: { eventos: { id: string; titulo: 
         {STATUS_OPCOES.map((s) => (
           <option key={s.value} value={s.value}>
             {s.label}
+          </option>
+        ))}
+      </Select>
+      <Select
+        defaultValue={searchParams.get("canal") ?? ""}
+        onChange={(e) => update("canal", e.target.value)}
+        className="h-9 w-auto min-w-[160px] border-[#263041] bg-[#18202e] text-sm"
+      >
+        {CANAL_OPCOES.map((c) => (
+          <option key={c.value} value={c.value}>
+            {c.label}
           </option>
         ))}
       </Select>

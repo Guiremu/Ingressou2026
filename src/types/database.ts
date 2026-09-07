@@ -7,6 +7,8 @@ export type PaymentMethod = "pix" | "credito" | "gratuito";
 export type OrderStatus = "pendente" | "pago" | "cancelado" | "estornado";
 export type TicketStatus = "valido" | "usado" | "cancelado";
 export type MotivoCortesia = "funcionario" | "amigo" | "patrocinador" | "outro";
+export type Canal = "online" | "pdv";
+export type FormaPagamentoPdv = "dinheiro" | "debito" | "credito" | "pix";
 
 export interface Profile {
   id: string;
@@ -89,6 +91,9 @@ export interface Order {
   parcelas: number;
   mp_payment_id: string | null;
   status: OrderStatus;
+  canal: Canal;
+  forma_pagamento_pdv: FormaPagamentoPdv | null;
+  pdv_terminal_id: string | null;
   criado_em: string;
 }
 
@@ -118,6 +123,9 @@ export interface Ticket {
   intransferivel: boolean;
   profile_id: string | null;
   gerado_por: string | null;
+  impresso_count: number;
+  impresso_em: string | null;
+  ultima_impressao_em: string | null;
   criado_em: string;
 }
 
@@ -140,6 +148,15 @@ export interface Validator {
   nome_identificacao: string;
   ativo: boolean;
   expira_em: string | null;
+  criado_em: string;
+}
+
+export interface PdvTerminal {
+  id: string;
+  producer_id: string;
+  token_publico: string;
+  nome_identificacao: string;
+  ativo: boolean;
   criado_em: string;
 }
 
@@ -184,4 +201,5 @@ export const RESERVED_SLUGS = [
   "meus-ingressos",
   "perfil",
   "regras",
+  "pdv",
 ];
