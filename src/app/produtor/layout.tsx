@@ -14,6 +14,7 @@ const mobileTabs = [
   { href: "/produtor", label: "Visão geral" },
   { href: "/produtor/eventos", label: "Eventos" },
   { href: "/produtor/financeiro", label: "Financeiro" },
+  { href: "/produtor/conta", label: "Config." },
 ];
 
 export default async function ProdutorLayout({ children }: { children: React.ReactNode }) {
@@ -70,14 +71,14 @@ export default async function ProdutorLayout({ children }: { children: React.Rea
         </div>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-between gap-1 border-t border-[#263041] bg-[#0f141d] px-3 py-2.5 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-between gap-0.5 border-t border-[#263041] bg-[#0f141d] px-1.5 py-2.5 md:hidden">
         {mobileTabs.map((tab) => (
-          <Link key={tab.href} href={tab.href} className="flex-1 py-1.5 text-center text-[11px] text-[#93a0b8]">
+          <Link key={tab.href} href={tab.href} className="flex-1 py-1.5 text-center text-[10px] leading-tight text-[#93a0b8]">
             {tab.label}
           </Link>
         ))}
         <form action="/logout" method="post" className="flex-1">
-          <button type="submit" className="w-full py-1.5 text-center text-[11px] text-[#93a0b8]">
+          <button type="submit" className="w-full py-1.5 text-center text-[10px] leading-tight text-[#93a0b8]">
             Sair
           </button>
         </form>
