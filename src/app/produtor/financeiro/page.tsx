@@ -148,7 +148,16 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: P
                     </p>
                     <p className="text-[#5d6b84]">
                       {o.canal === "pdv"
-                        ? formaPagamentoPdvLabel[o.forma_pagamento_pdv as keyof typeof formaPagamentoPdvLabel] ?? "PDV"
+                        ? o.forma_pagamento_pdv === "misto"
+                          ? (
+                              o.pdv_order_payments as unknown as { forma_pagamento: string; valor: number }[] | null
+                            )
+                              ?.map(
+                                (p) =>
+                                  `${formaPagamentoPdvLabel[p.forma_pagamento as keyof typeof formaPagamentoPdvLabel]} ${formatCurrency(Number(p.valor))}`,
+                              )
+                              .join(" + ") ?? "Misto"
+                          : formaPagamentoPdvLabel[o.forma_pagamento_pdv as keyof typeof formaPagamentoPdvLabel] ?? "PDV"
                         : `${o.metodo_pagamento} ${o.parcelas > 1 ? `${o.parcelas}x` : "à vista"}`}
                     </p>
                   </div>

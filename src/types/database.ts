@@ -8,7 +8,7 @@ export type OrderStatus = "pendente" | "pago" | "cancelado" | "estornado";
 export type TicketStatus = "valido" | "usado" | "cancelado";
 export type MotivoCortesia = "funcionario" | "amigo" | "patrocinador" | "outro";
 export type Canal = "online" | "pdv";
-export type FormaPagamentoPdv = "dinheiro" | "debito" | "credito" | "pix";
+export type FormaPagamentoPdv = "dinheiro" | "debito" | "credito" | "pix" | "misto";
 
 export interface Profile {
   id: string;
@@ -157,6 +157,14 @@ export interface PdvTerminal {
   token_publico: string;
   nome_identificacao: string;
   ativo: boolean;
+  criado_em: string;
+}
+
+export interface PdvOrderPayment {
+  id: string;
+  order_id: string;
+  forma_pagamento: Exclude<FormaPagamentoPdv, "misto">;
+  valor: number;
   criado_em: string;
 }
 

@@ -35,6 +35,7 @@ export async function GET(request: Request) {
     "canal",
     "metodo_pagamento",
     "forma_pagamento_pdv",
+    "detalhe_pagamento_pdv",
     "parcelas",
     "status",
     "valor_ingressos",
@@ -47,6 +48,8 @@ export async function GET(request: Request) {
 
   for (const o of orders ?? []) {
     const split = (o.payment_splits as unknown as { taxa_mp: number; taxa_plataforma: number; valor_liquido_produtor: number }[] | null)?.[0];
+    const pagamentos = o.pdv_order_payments as unknown as { forma_pagamento: string; valor: number }[] | null;
+    const detalhePagamento = (pagamentos ?? []).map((p) => `${p.forma_pagamento}:${p.valor}`).join("|");
     lines.push(
       [
         eventTitulo.get(o.event_id) ?? "",
@@ -55,6 +58,7 @@ export async function GET(request: Request) {
         o.canal,
         o.metodo_pagamento,
         o.forma_pagamento_pdv ?? "",
+        detalhePagamento,
         o.parcelas,
         o.status,
         o.valor_ingressos,

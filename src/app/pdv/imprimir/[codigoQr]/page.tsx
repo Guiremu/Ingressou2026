@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTicketViewData } from "@/lib/ticket-view";
 import { verifyPrintToken } from "@/lib/tickets";
-import { formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { registrarImpressao } from "./actions";
 import { ImprimirAoAbrir } from "./imprimir-ao-abrir";
 
@@ -29,10 +29,23 @@ export default async function ImprimirIngressoPage({
   if (!view) notFound();
 
   const admin = createAdminClient();
-  const { data: order } = await admin.from("orders").select("canal").eq("id", view.ticket.order_id).maybeSingle();
+  const { data: order } = await admin
+    .from("orders")
+    .select("canal, forma_pagamento_pdv")
+    .eq("id", view.ticket.order_id)
+    .maybeSingle();
   if (!order || order.canal !== "pdv") {
     return <Mensagem titulo="Ingresso não é de uma venda do PDV">Essa rota é só pra ingressos vendidos no PDV.</Mensagem>;
   }
+
+  const { data: pagamentos } = await admin
+    .from("pdv_order_payments")
+    .select("forma_pagamento, valor")
+    .eq("order_id", view.ticket.order_id!);
+  const pagamentoLabel = { dinheiro: "Dinheiro", debito: "Débito", credito: "Crédito", pix: "PIX" } as const;
+  const pagamentoTexto = (pagamentos ?? [])
+    .map((p) => `${pagamentoLabel[p.forma_pagamento as keyof typeof pagamentoLabel]} ${formatCurrency(Number(p.valor))}`)
+    .join(" + ");
 
   const confirmando = confirmar === "1";
 
@@ -70,6 +83,7 @@ export default async function ImprimirIngressoPage({
           <Linha label="Titular" valor={view.compradorNome} />
           <Linha label="Pedido" valor={view.numeroPedido} />
           <Linha label="Emitido por" valor={view.lojaEmissora ?? "—"} />
+          {pagamentoTexto && <Linha label="Pagamento" valor={pagamentoTexto} />}
         </div>
 
         <div className="flex flex-col items-center gap-1.5 border-t border-dashed border-black pt-2">

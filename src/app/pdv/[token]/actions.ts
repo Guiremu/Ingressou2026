@@ -4,7 +4,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { finalizePaidOrder } from "@/lib/orders";
 import { signPrintToken } from "@/lib/tickets";
 import { isValidCpf, onlyDigits } from "@/lib/utils";
-import type { FormaPagamentoPdv } from "@/types/database";
 
 export interface PdvSaleState {
   error?: string;
@@ -14,6 +13,14 @@ export interface PdvSaleState {
 interface ItemSelecionado {
   ticketTypeId: string;
   quantidade: number;
+}
+
+const FORMAS_VALIDAS = ["dinheiro", "debito", "credito", "pix"] as const;
+type FormaPagamentoUnica = (typeof FORMAS_VALIDAS)[number];
+
+interface PagamentoSelecionado {
+  forma_pagamento: FormaPagamentoUnica;
+  valor: number;
 }
 
 const PRINT_TOKEN_TTL_MS = 30 * 60 * 1000;
@@ -50,7 +57,6 @@ export async function listarLotesDoEvento(token: string, eventId: string) {
 export async function criarVendaPdv(_prevState: PdvSaleState, formData: FormData): Promise<PdvSaleState> {
   const token = String(formData.get("token") ?? "");
   const eventId = String(formData.get("event_id") ?? "");
-  const formaPagamento = String(formData.get("forma_pagamento") ?? "") as FormaPagamentoPdv;
   const compradorNome = String(formData.get("comprador_nome") ?? "").trim();
   const compradorCpfDigits = onlyDigits(String(formData.get("comprador_cpf") ?? ""));
 
@@ -62,9 +68,18 @@ export async function criarVendaPdv(_prevState: PdvSaleState, formData: FormData
   }
   itens = itens.filter((i) => i.quantidade > 0);
 
+  let pagamentos: PagamentoSelecionado[] = [];
+  try {
+    pagamentos = JSON.parse(String(formData.get("pagamentos") ?? "[]"));
+  } catch {
+    return { error: "Pagamento inválido." };
+  }
+  pagamentos = pagamentos.filter((p) => p.valor > 0);
+
   if (itens.length === 0) return { error: "Selecione ao menos um ingresso." };
-  if (!["dinheiro", "debito", "credito", "pix"].includes(formaPagamento)) {
-    return { error: "Selecione a forma de pagamento." };
+  if (pagamentos.length === 0) return { error: "Informe ao menos uma forma de pagamento." };
+  if (pagamentos.some((p) => !FORMAS_VALIDAS.includes(p.forma_pagamento))) {
+    return { error: "Forma de pagamento inválida." };
   }
   if (compradorCpfDigits && !isValidCpf(compradorCpfDigits)) {
     return { error: "CPF do comprador inválido (ou deixe em branco)." };
@@ -132,6 +147,14 @@ export async function criarVendaPdv(_prevState: PdvSaleState, formData: FormData
     return acc + Number(tt.preco) * item.quantidade;
   }, 0);
 
+  const totalPago = pagamentos.reduce((acc, p) => acc + p.valor, 0);
+  if (Math.abs(totalPago - valorIngressos) > 0.01) {
+    await liberarTudo();
+    return { error: "A soma das formas de pagamento não bate com o total da venda." };
+  }
+
+  const formaPagamentoResumo = pagamentos.length > 1 ? "misto" : pagamentos[0].forma_pagamento;
+
   // CPF opcional: se bater com uma conta já cadastrada, os ingressos já nascem
   // vinculados a ela (mesmo padrão de auto-vínculo usado nas cortesias).
   let perfilVinculado: { id: string } | null = null;
@@ -156,7 +179,7 @@ export async function criarVendaPdv(_prevState: PdvSaleState, formData: FormData
       parcelas: 1,
       status: "pendente",
       canal: "pdv",
-      forma_pagamento_pdv: formaPagamento,
+      forma_pagamento_pdv: formaPagamentoResumo,
       pdv_terminal_id: terminal.id,
     })
     .select("id")
@@ -183,6 +206,14 @@ export async function criarVendaPdv(_prevState: PdvSaleState, formData: FormData
     taxa_plataforma: 0,
     valor_liquido_produtor: valorIngressos,
   });
+
+  await admin.from("pdv_order_payments").insert(
+    pagamentos.map((p) => ({
+      order_id: order.id,
+      forma_pagamento: p.forma_pagamento,
+      valor: p.valor,
+    })),
+  );
 
   await finalizePaidOrder(order.id, null);
 

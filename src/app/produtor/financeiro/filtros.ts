@@ -9,7 +9,7 @@ export interface FinanceiroFiltros {
 }
 
 const ORDERS_SELECT =
-  "id, comprador_nome, valor_ingressos, valor_total_cobrado, metodo_pagamento, parcelas, status, criado_em, event_id, canal, forma_pagamento_pdv, payment_splits(taxa_mp, taxa_plataforma, valor_liquido_produtor)";
+  "id, comprador_nome, valor_ingressos, valor_total_cobrado, metodo_pagamento, parcelas, status, criado_em, event_id, canal, forma_pagamento_pdv, payment_splits(taxa_mp, taxa_plataforma, valor_liquido_produtor), pdv_order_payments(forma_pagamento, valor)";
 
 /** Monta a query de `orders` filtrada, reaproveitada pela página e pelo export CSV. */
 export function buildOrdersQuery(supabase: SupabaseClient, eventIds: string[], filtros: FinanceiroFiltros) {
