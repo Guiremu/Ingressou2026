@@ -24,30 +24,32 @@ export function EventFilters({ categorias, cidades }: { categorias: string[]; ci
         onChange={(e) => update("q", e.target.value)}
         className="sm:max-w-xs"
       />
-      <Select
-        defaultValue={searchParams.get("cidade") ?? ""}
-        onChange={(e) => update("cidade", e.target.value)}
-        className="sm:max-w-[180px]"
-      >
-        <option value="">Todas as cidades</option>
-        {cidades.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </Select>
-      <Select
-        defaultValue={searchParams.get("categoria") ?? ""}
-        onChange={(e) => update("categoria", e.target.value)}
-        className="sm:max-w-[180px]"
-      >
-        <option value="">Todas as categorias</option>
-        {categorias.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </Select>
+      <div className="grid grid-cols-2 gap-2 sm:contents">
+        <Select
+          defaultValue={searchParams.get("cidade") ?? ""}
+          onChange={(e) => update("cidade", e.target.value)}
+          className="min-w-0 sm:max-w-[180px]"
+        >
+          <option value="">Todas as cidades</option>
+          {cidades.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
+        <Select
+          defaultValue={searchParams.get("categoria") ?? ""}
+          onChange={(e) => update("categoria", e.target.value)}
+          className="min-w-0 sm:max-w-[180px]"
+        >
+          <option value="">Todas as categorias</option>
+          {categorias.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
+      </div>
     </div>
   );
 }
