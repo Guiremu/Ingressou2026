@@ -93,7 +93,7 @@ export async function criarPedido(
 
   const { data: ticketTypes } = await admin
     .from("ticket_types")
-    .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida")
+    .select("id, nome, preco, max_por_pedido, quantidade_total, quantidade_vendida, ativo")
     .eq("event_id", eventId)
     .in(
       "id",
@@ -102,6 +102,11 @@ export async function criarPedido(
 
   if (!ticketTypes || ticketTypes.length !== itens.length) {
     return { error: "Um ou mais lotes não foram encontrados." };
+  }
+
+  const loteInativo = ticketTypes.find((t) => !t.ativo);
+  if (loteInativo) {
+    return { error: `O lote "${loteInativo.nome}" não está mais disponível para venda.` };
   }
 
   const reservados: ItemSelecionado[] = [];

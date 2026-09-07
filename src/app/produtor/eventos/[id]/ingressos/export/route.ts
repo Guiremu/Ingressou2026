@@ -20,12 +20,23 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { data: tickets } = await supabase
     .from("tickets")
     .select(
-      "codigo_qr, status, is_cortesia, criado_em, usado_em, ticket_types(nome), orders(comprador_nome, comprador_email, comprador_cpf)",
+      "codigo_qr, status, is_cortesia, titular_nome, titular_cpf, intransferivel, criado_em, usado_em, ticket_types(nome), orders(comprador_nome, comprador_email, comprador_cpf)",
     )
     .eq("event_id", id)
     .order("criado_em", { ascending: true });
 
-  const header = ["codigo", "comprador", "email", "cpf", "lote", "status", "cortesia", "criado_em", "usado_em"];
+  const header = [
+    "codigo",
+    "titular",
+    "email",
+    "cpf",
+    "lote",
+    "status",
+    "cortesia",
+    "intransferivel",
+    "criado_em",
+    "usado_em",
+  ];
   const lines = [header.join(";")];
 
   for (const t of tickets ?? []) {
@@ -34,12 +45,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     lines.push(
       [
         t.codigo_qr,
-        order?.comprador_nome ?? "",
+        t.titular_nome ?? order?.comprador_nome ?? "",
         order?.comprador_email ?? "",
-        order?.comprador_cpf ?? "",
+        t.titular_cpf ?? order?.comprador_cpf ?? "",
         tipo?.nome ?? "",
         t.status,
         t.is_cortesia ? "sim" : "não",
+        t.intransferivel ? "sim" : "não",
         t.criado_em,
         t.usado_em ?? "",
       ]

@@ -24,7 +24,9 @@ export default async function EventPage({
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, titulo, descricao, categoria, imagem_url, local, endereco, cidade, data_inicio, data_fim, slug")
+    .select(
+      "id, titulo, descricao, categoria, imagem_url, local, endereco, cidade, data_inicio, data_fim, slug, politica_reembolso",
+    )
     .eq("producer_id", producer.id)
     .eq("slug", eventSlug)
     .eq("status", "publicado")
@@ -37,7 +39,8 @@ export default async function EventPage({
     .select("id, nome, descricao, preco, quantidade_total, quantidade_vendida, max_por_pedido, tipo")
     .eq("event_id", event.id)
     .eq("tipo", "pago")
-    .order("preco", { ascending: true });
+    .eq("ativo", true)
+    .order("ordem", { ascending: true });
 
   const nome = producer.nome_fantasia ?? producer.razao_social;
 
@@ -113,6 +116,15 @@ export default async function EventPage({
                 {event.endereco ?? `${event.local}, ${event.cidade}`}
               </div>
             </div>
+
+            {event.politica_reembolso && (
+              <div className="flex flex-col gap-2">
+                <h2 className="font-[var(--font-sora)] text-base font-bold text-white">Política de reembolso</h2>
+                <p className="max-w-[560px] whitespace-pre-line text-sm leading-relaxed text-[var(--text-muted-2)]">
+                  {event.politica_reembolso}
+                </p>
+              </div>
+            )}
           </div>
 
           <TicketSelector eventId={event.id} lotes={lotes} />

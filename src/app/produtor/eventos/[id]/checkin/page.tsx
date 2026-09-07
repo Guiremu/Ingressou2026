@@ -13,7 +13,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ id: st
 
   const { data: tickets } = await supabase
     .from("tickets")
-    .select("status, usado_em, ticket_types(nome), orders(comprador_nome)")
+    .select("status, usado_em, titular_nome, ticket_types(nome), orders(comprador_nome)")
     .eq("event_id", id)
     .neq("status", "cancelado");
 
@@ -25,7 +25,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ id: st
     .sort((a, b) => new Date(b.usado_em!).getTime() - new Date(a.usado_em!).getTime())
     .slice(0, 10)
     .map((t) => ({
-      nome: (t.orders as unknown as { comprador_nome: string } | null)?.comprador_nome ?? "Cortesia",
+      nome: t.titular_nome ?? (t.orders as unknown as { comprador_nome: string } | null)?.comprador_nome ?? "Cortesia",
       detalhe: (t.ticket_types as unknown as { nome: string } | null)?.nome ?? "",
       hora: new Date(t.usado_em!).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
       cor: "#34D399",

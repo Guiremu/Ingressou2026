@@ -15,7 +15,7 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
   const { data: ticket } = await admin
     .from("tickets")
     .select(
-      "id, codigo_qr, assinatura_hmac, status, event_id, order_id, ticket_types(nome), events(titulo, local, endereco, cidade, data_inicio, producers(nome_fantasia, razao_social)), orders(comprador_nome)",
+      "id, codigo_qr, assinatura_hmac, status, event_id, order_id, titular_nome, intransferivel, ticket_types(nome), events(titulo, local, endereco, cidade, data_inicio, producers(nome_fantasia, razao_social)), orders(comprador_nome)",
     )
     .eq("codigo_qr", codigoQr)
     .maybeSingle();
@@ -31,7 +31,8 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
     producers: { nome_fantasia: string | null; razao_social: string } | null;
   } | null;
   const loteNome = (ticket.ticket_types as unknown as { nome: string } | null)?.nome ?? "";
-  const compradorNome = (ticket.orders as unknown as { comprador_nome: string } | null)?.comprador_nome ?? "Cortesia";
+  const compradorNome =
+    ticket.titular_nome ?? (ticket.orders as unknown as { comprador_nome: string } | null)?.comprador_nome ?? "Cortesia";
   const produtorNome = event?.producers ? (event.producers.nome_fantasia ?? event.producers.razao_social) : "Cortesia";
 
   const qrDataUrl = await QRCode.toDataURL(
@@ -126,6 +127,18 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
                 <p className="text-xs leading-relaxed text-[#fca5a5]">
                   <span className="font-bold">Não envie print deste QR.</span> Quem apresentar primeiro na
                   portaria valida a entrada e o código é bloqueado.
+                </p>
+              </div>
+            )}
+
+            {ticket.intransferivel && (
+              <div className="flex w-full items-start gap-2.5 rounded-xl border border-[var(--warning)]/35 bg-[var(--warning)]/9 p-3">
+                <div className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[var(--warning)] text-[13px] font-extrabold text-[#2a1a00]">
+                  !
+                </div>
+                <p className="text-xs leading-relaxed text-[#fde68a]">
+                  <span className="font-bold">Ingresso intransferível.</span> {compradorNome} precisa apresentar um
+                  documento com foto na portaria.
                 </p>
               </div>
             )}

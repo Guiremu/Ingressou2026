@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireProducer } from "@/lib/producer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
+import { POLITICA_REEMBOLSO_PADRAO } from "@/lib/event-defaults";
 
 export interface NovoEventoState {
   error?: string;
@@ -53,6 +54,7 @@ export async function criarEvento(_prevState: NovoEventoState, formData: FormDat
       data_fim: dataFim ? new Date(dataFim).toISOString() : null,
       status: "rascunho",
       slug,
+      politica_reembolso: POLITICA_REEMBOLSO_PADRAO,
     })
     .select("id")
     .single();

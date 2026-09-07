@@ -18,7 +18,9 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
 
   const { data: tickets } = await supabase
     .from("tickets")
-    .select("id, codigo_qr, status, is_cortesia, usado_em, criado_em, ticket_types(nome), orders(comprador_nome, comprador_email)")
+    .select(
+      "id, codigo_qr, status, is_cortesia, titular_nome, intransferivel, usado_em, criado_em, ticket_types(nome), orders(comprador_nome, comprador_email)",
+    )
     .eq("event_id", id)
     .order("criado_em", { ascending: false });
 
@@ -40,7 +42,9 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
               <CardContent className="flex items-center justify-between p-3 text-sm">
                 <div>
                   <p className="font-medium text-white">
-                    {order?.comprador_nome ?? "Cortesia"} {t.is_cortesia && <Badge variant="secondary">cortesia</Badge>}
+                    {t.titular_nome ?? order?.comprador_nome ?? "Cortesia"}{" "}
+                    {t.is_cortesia && <Badge variant="secondary">cortesia</Badge>}
+                    {t.intransferivel && <Badge variant="warning">intransferível</Badge>}
                   </p>
                   <p className="text-[var(--text-muted)]">
                     {tipo?.nome} — {order?.comprador_email ?? "—"}

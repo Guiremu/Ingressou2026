@@ -53,6 +53,7 @@ export interface EventRow {
   data_fim: string | null;
   status: EventStatus;
   slug: string;
+  politica_reembolso: string | null;
   criado_em: string;
 }
 
@@ -68,6 +69,8 @@ export interface TicketType {
   data_fim_venda: string | null;
   max_por_pedido: number;
   tipo: TicketTypeTipo;
+  ativo: boolean;
+  ordem: number;
   criado_em: string;
 }
 
@@ -110,6 +113,9 @@ export interface Ticket {
   validado_por: string | null;
   is_cortesia: boolean;
   motivo_cortesia: MotivoCortesia | null;
+  titular_nome: string | null;
+  titular_cpf: string | null;
+  intransferivel: boolean;
   gerado_por: string | null;
   criado_em: string;
 }

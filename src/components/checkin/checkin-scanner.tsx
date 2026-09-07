@@ -16,6 +16,9 @@ interface Resultado {
   ok: boolean;
   mensagem: string;
   nomeLote?: string;
+  titularNome?: string | null;
+  titularCpf?: string | null;
+  intransferivel?: boolean;
 }
 
 const RESULT_STYLES = {
@@ -97,14 +100,21 @@ export function CheckinScanner({
           if (error || !row) {
             setResultado({ ok: false, mensagem: "Erro ao validar ingresso." });
           } else {
-            setResultado({ ok: row.ok, mensagem: row.mensagem, nomeLote: row.nome_lote });
+            setResultado({
+              ok: row.ok,
+              mensagem: row.mensagem,
+              nomeLote: row.nome_lote,
+              titularNome: row.titular_nome,
+              titularCpf: row.titular_cpf,
+              intransferivel: row.intransferivel,
+            });
             if (row.ok) {
               setValidados((v) => v + 1);
               setUltimosDezMin((v) => v + 1);
               setHistorico((h) =>
                 [
                   {
-                    nome: row.nome_lote ?? "Ingresso",
+                    nome: row.titular_nome ?? row.nome_lote ?? "Ingresso",
                     detalhe: `${row.nome_lote ?? ""} · ${payload.c.slice(0, 8).toUpperCase()}`,
                     hora: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
                     cor: "#34D399",
@@ -173,6 +183,19 @@ export function CheckinScanner({
                   <span className="text-[13px] leading-relaxed text-[#c7d0e0]">{resultado.mensagem}</span>
                 </div>
               </div>
+              {resultado.ok && resultado.intransferivel && (
+                <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-[rgba(251,191,36,0.4)] bg-[rgba(251,191,36,0.12)] p-3">
+                  <div className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-[#FBBF24] text-[13px] font-extrabold text-[#2a1a00]">
+                    !
+                  </div>
+                  <p className="text-xs leading-relaxed text-[#fde68a]">
+                    <span className="font-bold">Ingresso intransferível — exija documento com foto.</span>
+                    <br />
+                    Titular: {resultado.titularNome ?? "não informado"}
+                    {resultado.titularCpf ? ` · CPF ${resultado.titularCpf}` : ""}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
