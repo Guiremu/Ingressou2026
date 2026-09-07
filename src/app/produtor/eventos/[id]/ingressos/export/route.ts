@@ -20,9 +20,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { data: tickets } = await supabase
     .from("tickets")
     .select(
-      "codigo_qr, status, is_cortesia, titular_nome, titular_cpf, intransferivel, criado_em, usado_em, ticket_types(nome), orders(comprador_nome, comprador_email, comprador_cpf)",
+      "codigo_qr, status, titular_nome, titular_cpf, intransferivel, criado_em, usado_em, ticket_types(nome), orders(comprador_nome, comprador_email, comprador_cpf)",
     )
     .eq("event_id", id)
+    .eq("is_cortesia", false)
     .order("criado_em", { ascending: true });
 
   const header = [
@@ -32,7 +33,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     "cpf",
     "lote",
     "status",
-    "cortesia",
     "intransferivel",
     "criado_em",
     "usado_em",
@@ -50,7 +50,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         t.titular_cpf ?? order?.comprador_cpf ?? "",
         tipo?.nome ?? "",
         t.status,
-        t.is_cortesia ? "sim" : "não",
         t.intransferivel ? "sim" : "não",
         t.criado_em,
         t.usado_em ?? "",
