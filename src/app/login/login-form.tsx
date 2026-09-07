@@ -49,12 +49,6 @@ export function LoginForm() {
           Cadastre-se
         </Link>
       </p>
-      <p className="mt-2 text-center text-sm text-[var(--text-muted)]">
-        É organizador de eventos?{" "}
-        <Link href="/cadastro/produtor" className="font-medium text-white underline">
-          Cadastre-se como produtor
-        </Link>
-      </p>
     </>
   );
 }
