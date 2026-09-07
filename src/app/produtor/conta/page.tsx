@@ -3,6 +3,7 @@ import { getMpOAuthUrl } from "@/lib/mercadopago";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { desconectarMercadoPago } from "./actions";
+import { PerfilPublicoForm } from "./perfil-publico-form";
 
 const ERROS: Record<string, string> = {
   parametros_invalidos: "A conexão foi cancelada ou expirou. Clique em conectar de novo.",
@@ -48,6 +49,14 @@ export default async function ContaPage({
             </p>
             <p>URL pública: /{producer.slug}</p>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#263041] bg-[#121722] p-4.5">
+          <h2 className="mb-1 font-[var(--font-sora)] text-base font-bold text-white">Perfil público</h2>
+          <p className="mb-3.5 text-sm text-[#93a0b8]">
+            É o que aparece na sua página <span className="font-medium text-white">ingressou.com/{producer.slug}</span>.
+          </p>
+          <PerfilPublicoForm producer={producer} />
         </div>
 
         <div className="rounded-2xl border border-[#263041] bg-[#121722] p-4.5">

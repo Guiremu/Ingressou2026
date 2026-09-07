@@ -78,17 +78,17 @@ export default async function ProducerPage({
           )}
         </div>
 
-        <div className="-mt-[34px] flex flex-wrap items-end justify-between gap-4 px-1">
+        <div className="flex flex-wrap items-end justify-between gap-4 px-1">
           <div className="flex items-end gap-4">
             {producer.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={producer.logo_url}
                 alt={nome}
-                className="h-[84px] w-[84px] rounded-[20px] border-2 border-[#0e0e16] object-cover"
+                className="-mt-[34px] h-[84px] w-[84px] flex-none rounded-[20px] border-2 border-[#0e0e16] object-cover"
               />
             ) : (
-              <div className="flex h-[84px] w-[84px] items-center justify-center rounded-[20px] border-2 border-[#0e0e16] bg-[var(--surface)] font-[var(--font-sora)] text-[26px] font-extrabold text-[var(--accent)]">
+              <div className="-mt-[34px] flex h-[84px] w-[84px] flex-none items-center justify-center rounded-[20px] border-2 border-[#0e0e16] bg-[var(--surface)] font-[var(--font-sora)] text-[26px] font-extrabold text-[var(--accent)]">
                 {nome.charAt(0).toUpperCase()}
               </div>
             )}
