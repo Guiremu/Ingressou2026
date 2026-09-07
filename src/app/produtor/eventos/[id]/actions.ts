@@ -24,6 +24,7 @@ async function assertOwnsLote(admin: ReturnType<typeof createAdminClient>, loteI
 export interface FormState {
   error?: string;
   success?: string;
+  codigoQr?: string;
 }
 
 export async function atualizarStatusEvento(eventId: string, status: EventStatus): Promise<FormState> {
@@ -287,21 +288,20 @@ export async function reordenarLote(loteId: string, direcao: "up" | "down"): Pro
   return {};
 }
 
-export async function gerarCortesias(_prevState: FormState, formData: FormData): Promise<FormState> {
+/** Cortesias são geradas uma de cada vez — cada uma tem seu próprio titular. */
+export async function gerarCortesia(_prevState: FormState, formData: FormData): Promise<FormState> {
   const eventId = String(formData.get("event_id") ?? "");
   const { producer, profile } = await requireProducer();
   const admin = createAdminClient();
   await assertOwnsEvent(admin, eventId, producer.id);
 
-  const quantidade = Number(formData.get("quantidade") ?? 0);
   const motivo = String(formData.get("motivo") ?? "outro") as MotivoCortesia;
   const titularNome = String(formData.get("titular_nome") ?? "").trim();
   const titularCpf = onlyDigits(String(formData.get("titular_cpf") ?? ""));
   const intransferivel = String(formData.get("intransferivel") ?? "") === "1";
 
-  if (quantidade < 1) return { error: "Informe uma quantidade válida." };
-  if (intransferivel && !titularNome) {
-    return { error: "Cortesia intransferível precisa do nome do titular." };
+  if (intransferivel && (!titularNome || titularCpf.length !== 11)) {
+    return { error: "Cortesia intransferível exige nome e CPF (11 dígitos) do titular." };
   }
 
   let { data: cortesiaLote } = await admin
@@ -328,24 +328,24 @@ export async function gerarCortesias(_prevState: FormState, formData: FormData):
     cortesiaLote = novoLote;
   }
 
-  for (let i = 0; i < quantidade; i++) {
-    const codigoQr = randomUUID();
-    await admin.from("tickets").insert({
-      ticket_type_id: cortesiaLote.id,
-      event_id: eventId,
-      codigo_qr: codigoQr,
-      assinatura_hmac: signTicket(codigoQr, eventId),
-      is_cortesia: true,
-      motivo_cortesia: motivo,
-      titular_nome: titularNome || null,
-      titular_cpf: titularCpf || null,
-      intransferivel,
-      gerado_por: profile.id,
-    });
-  }
+  const codigoQr = randomUUID();
+  const { error } = await admin.from("tickets").insert({
+    ticket_type_id: cortesiaLote.id,
+    event_id: eventId,
+    codigo_qr: codigoQr,
+    assinatura_hmac: signTicket(codigoQr, eventId),
+    is_cortesia: true,
+    motivo_cortesia: motivo,
+    titular_nome: titularNome || null,
+    titular_cpf: titularCpf || null,
+    intransferivel,
+    gerado_por: profile.id,
+  });
+
+  if (error) return { error: error.message };
 
   revalidatePath(`/produtor/eventos/${eventId}`);
-  return { success: `${quantidade} ingresso(s) cortesia gerado(s).` };
+  return { success: "Ingresso cortesia gerado.", codigoQr };
 }
 
 export async function criarValidator(_prevState: FormState, formData: FormData): Promise<FormState> {

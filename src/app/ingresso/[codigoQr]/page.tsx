@@ -1,44 +1,20 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import QRCode from "qrcode";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { buildQrPayload } from "@/lib/qr-payload";
 import { buildGoogleWalletSaveUrl } from "@/lib/google-wallet";
+import { getTicketViewData } from "@/lib/ticket-view";
 import { SiteHeaderAsync } from "@/components/site/site-header-async";
 import { ShareTicketButton } from "@/components/site/share-ticket-button";
 import { formatDate } from "@/lib/utils";
 
 export default async function IngressoPage({ params }: { params: Promise<{ codigoQr: string }> }) {
   const { codigoQr } = await params;
-  const admin = createAdminClient();
+  const view = await getTicketViewData(codigoQr);
+  if (!view) notFound();
 
-  const { data: ticket } = await admin
-    .from("tickets")
-    .select(
-      "id, codigo_qr, assinatura_hmac, status, event_id, order_id, titular_nome, intransferivel, ticket_types(nome), events(titulo, local, endereco, cidade, data_inicio, producers(nome_fantasia, razao_social)), orders(comprador_nome)",
-    )
-    .eq("codigo_qr", codigoQr)
-    .maybeSingle();
+  const { ticket, event, loteNome, compradorNome, produtorNome, codigoFormatado, numeroPedido, qrPayload } = view;
 
-  if (!ticket) notFound();
-
-  const event = ticket.events as unknown as {
-    titulo: string;
-    local: string | null;
-    endereco: string | null;
-    cidade: string | null;
-    data_inicio: string;
-    producers: { nome_fantasia: string | null; razao_social: string } | null;
-  } | null;
-  const loteNome = (ticket.ticket_types as unknown as { nome: string } | null)?.nome ?? "";
-  const compradorNome =
-    ticket.titular_nome ?? (ticket.orders as unknown as { comprador_nome: string } | null)?.comprador_nome ?? "Cortesia";
-  const produtorNome = event?.producers ? (event.producers.nome_fantasia ?? event.producers.razao_social) : "Cortesia";
-
-  const qrDataUrl = await QRCode.toDataURL(
-    buildQrPayload({ codigo_qr: ticket.codigo_qr, assinatura_hmac: ticket.assinatura_hmac, event_id: ticket.event_id }),
-    { width: 320, margin: 1 },
-  );
+  const qrDataUrl = await QRCode.toDataURL(qrPayload, { width: 320, margin: 1 });
 
   const walletUrl = event
     ? buildGoogleWalletSaveUrl({
@@ -51,12 +27,6 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
         loteNome,
       })
     : null;
-
-  const codigoCurto = ticket.codigo_qr.replace(/-/g, "").slice(0, 8).toUpperCase();
-  const codigoFormatado = `${codigoCurto.slice(0, 4)}-${codigoCurto.slice(4)}`;
-  const numeroPedido = ticket.order_id
-    ? `#IGR-${ticket.order_id.replace(/-/g, "").slice(0, 5).toUpperCase()}`
-    : "Cortesia";
 
   const statusInfo = {
     valido: null,
@@ -150,6 +120,22 @@ export default async function IngressoPage({ params }: { params: Promise<{ codig
           <p className="px-1.5 text-center text-[11px] leading-relaxed text-[var(--text-dim)]">
             Esse link abre este ingresso sem precisar de login — dá pra mandar pra outra pessoa usar.
           </p>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <a
+              href={`/ingresso/${codigoQr}/pdf`}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--border-2)] bg-[var(--surface)] px-4 py-3 text-sm font-bold text-white"
+            >
+              Baixar PDF
+            </a>
+            <a
+              href={`/ingresso/${codigoQr}/imagem`}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--border-2)] bg-[var(--surface)] px-4 py-3 text-sm font-bold text-white"
+            >
+              Baixar imagem
+            </a>
+          </div>
+
           {walletUrl && (
             <a
               href={walletUrl}
