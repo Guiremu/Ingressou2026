@@ -2,7 +2,6 @@ import { getEventoDoProdutor } from "@/lib/producer";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TransferirForm } from "../transferir-form";
 import { formatDate } from "@/lib/utils";
 
 const statusVariant = { valido: "success", usado: "secondary", cancelado: "destructive" } as const;
@@ -55,7 +54,6 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
                   {t.usado_em && <p className="mt-1 text-xs text-[#5d6b84]">{formatDate(t.usado_em)}</p>}
                 </div>
               </div>
-              {!t.profile_id && <TransferirForm ticketId={t.id} />}
             </div>
           );
         })}
