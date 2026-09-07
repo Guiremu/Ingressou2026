@@ -15,6 +15,13 @@ export default async function EventoLayout({
   const { id } = await params;
   const { event, producer } = await getEventoDoProdutor(id);
 
+  const statusVariant = {
+    rascunho: "secondary",
+    publicado: "success",
+    encerrado: "warning",
+    cancelado: "destructive",
+  } as const;
+
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#263041] bg-[#0f141d] px-5 py-4">
@@ -23,7 +30,7 @@ export default async function EventoLayout({
             <h1 className="min-w-0 break-words font-[var(--font-sora)] text-[19px] font-bold tracking-tight text-white">
               {event.titulo}
             </h1>
-            <Badge variant="secondary" className="flex-none">
+            <Badge variant={statusVariant[event.status]} className="flex-none">
               {event.status}
             </Badge>
           </div>

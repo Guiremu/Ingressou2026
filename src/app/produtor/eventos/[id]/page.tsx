@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
 import { EventEditForm } from "./event-edit-form";
 import { ExcluirEventoButton } from "./excluir-evento-button";
+import { CancelarEventoButton } from "./cancelar-evento-button";
 
 export default async function VisaoGeralPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -55,6 +56,16 @@ export default async function VisaoGeralPage({ params }: { params: Promise<{ id:
             Excluir um evento em rascunho apaga tudo (lotes, cortesias) sem volta.
           </p>
           <ExcluirEventoButton eventId={event.id} />
+        </div>
+      )}
+
+      {event.status !== "rascunho" && event.status !== "cancelado" && (
+        <div className="rounded-2xl border border-[var(--pink)]/30 bg-[var(--pink)]/5 p-4.5">
+          <h2 className="mb-1 font-[var(--font-sora)] text-base font-bold text-white">Zona de risco</h2>
+          <p className="mb-3 text-sm text-[#93a0b8]">
+            Cancelar impede novas vendas e tira o evento da vitrine pública.
+          </p>
+          <CancelarEventoButton eventId={event.id} />
         </div>
       )}
     </>

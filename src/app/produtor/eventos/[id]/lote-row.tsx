@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   atualizarLote,
   alternarLote,
@@ -33,6 +34,7 @@ export function LoteRow({
   isLast: boolean;
 }) {
   const [editando, setEditando] = useState(false);
+  const [expandido, setExpandido] = useState(false);
   const [state, formAction, pending] = useActionState(atualizarLote, initialState);
   const [pendingAcao, startTransition] = useTransition();
 
@@ -129,63 +131,72 @@ export function LoteRow({
 
   return (
     <div className="flex flex-col gap-2.5 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <button
+        type="button"
+        onClick={() => setExpandido((v) => !v)}
+        className="flex w-full flex-wrap items-center justify-between gap-3 text-left"
+      >
         <div className="min-w-0">
           <p className="break-words font-medium text-white">
             {lote.nome} {!lote.ativo && <Badge variant="secondary">pausado</Badge>}
           </p>
           <p className="text-sm text-[#93a0b8]">{formatCurrency(Number(lote.preco))}</p>
         </div>
-        <p className="flex-none text-sm text-[#93a0b8]">
-          {lote.quantidade_vendida} / {lote.quantidade_total} vendidos
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" variant="outline" onClick={() => setEditando(true)}>
-          Editar
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={pendingAcao}
-          onClick={() => acao(() => alternarLote(lote.id, !lote.ativo))}
-        >
-          {lote.ativo ? "Pausar" : "Reativar"}
-        </Button>
-        <Button type="button" size="sm" variant="outline" disabled={pendingAcao} onClick={() => acao(() => duplicarLote(lote.id))}>
-          Duplicar
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={pendingAcao || isFirst}
-          onClick={() => acao(() => reordenarLote(lote.id, "up"))}
-        >
-          ↑
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={pendingAcao || isLast}
-          onClick={() => acao(() => reordenarLote(lote.id, "down"))}
-        >
-          ↓
-        </Button>
-        {lote.quantidade_vendida === 0 && (
+        <div className="flex flex-none items-center gap-2">
+          <p className="text-sm text-[#93a0b8]">
+            {lote.quantidade_vendida} / {lote.quantidade_total} vendidos
+          </p>
+          <ChevronDown className={`h-4 w-4 text-[#93a0b8] transition-transform ${expandido ? "rotate-180" : ""}`} />
+        </div>
+      </button>
+      {expandido && (
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={() => setEditando(true)}>
+            Editar
+          </Button>
           <Button
             type="button"
             size="sm"
-            variant="destructive"
+            variant="outline"
             disabled={pendingAcao}
-            onClick={() => acao(() => excluirLote(lote.id), "Excluir este lote? Essa ação não pode ser desfeita.")}
+            onClick={() => acao(() => alternarLote(lote.id, !lote.ativo))}
           >
-            Excluir
+            {lote.ativo ? "Pausar" : "Reativar"}
           </Button>
-        )}
-      </div>
+          <Button type="button" size="sm" variant="outline" disabled={pendingAcao} onClick={() => acao(() => duplicarLote(lote.id))}>
+            Duplicar
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={pendingAcao || isFirst}
+            onClick={() => acao(() => reordenarLote(lote.id, "up"))}
+          >
+            ↑
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={pendingAcao || isLast}
+            onClick={() => acao(() => reordenarLote(lote.id, "down"))}
+          >
+            ↓
+          </Button>
+          {lote.quantidade_vendida === 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              disabled={pendingAcao}
+              onClick={() => acao(() => excluirLote(lote.id), "Excluir este lote? Essa ação não pode ser desfeita.")}
+            >
+              Excluir
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

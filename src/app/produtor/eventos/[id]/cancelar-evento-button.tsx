@@ -4,25 +4,23 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { atualizarStatusEvento } from "./actions";
 import { Button } from "@/components/ui/button";
-import type { EventStatus } from "@/types/database";
 
-export function StatusActions({ eventId, status }: { eventId: string; status: EventStatus }) {
+export function CancelarEventoButton({ eventId }: { eventId: string }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  function change(next: EventStatus) {
+  function cancelar() {
+    if (!window.confirm("Cancelar este evento? Ele para de vender e some da vitrine pública.")) return;
     startTransition(async () => {
-      const result = await atualizarStatusEvento(eventId, next);
+      const result = await atualizarStatusEvento(eventId, "cancelado");
       if (result.error) alert(result.error);
       router.refresh();
     });
   }
 
-  if (status !== "rascunho") return null;
-
   return (
-    <Button disabled={pending} onClick={() => change("publicado")}>
-      Publicar evento
+    <Button disabled={pending} variant="destructive" onClick={cancelar}>
+      Cancelar evento
     </Button>
   );
 }

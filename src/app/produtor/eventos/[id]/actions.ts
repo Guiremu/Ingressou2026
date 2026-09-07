@@ -407,6 +407,28 @@ export async function transferirIngresso(_prevState: FormState, formData: FormDa
   return { success: `Ingresso vinculado à conta de ${perfil.nome}.` };
 }
 
+/** Cancela uma cortesia já gerada — mantém o histórico, só invalida pra check-in. */
+export async function cancelarCortesia(ticketId: string): Promise<FormState> {
+  const { producer } = await requireProducer();
+  const admin = createAdminClient();
+
+  const { data: ticket } = await admin.from("tickets").select("*, events!inner(producer_id)").eq("id", ticketId).single();
+  const producerIdDoTicket = (ticket?.events as unknown as { producer_id: string } | null)?.producer_id;
+  if (!ticket || producerIdDoTicket !== producer.id || !ticket.is_cortesia) {
+    return { error: "Cortesia não encontrada." };
+  }
+  if (ticket.status === "cancelado") return { error: "Essa cortesia já está cancelada." };
+  if (ticket.status === "usado") {
+    return { error: "Essa cortesia já foi validada na portaria — não é possível cancelar." };
+  }
+
+  const { error } = await admin.from("tickets").update({ status: "cancelado" }).eq("id", ticketId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/produtor/eventos/${ticket.event_id}/cortesias`);
+  return { success: "Cortesia cancelada." };
+}
+
 export async function criarValidator(_prevState: FormState, formData: FormData): Promise<FormState> {
   const eventId = String(formData.get("event_id") ?? "");
   const { producer } = await requireProducer();

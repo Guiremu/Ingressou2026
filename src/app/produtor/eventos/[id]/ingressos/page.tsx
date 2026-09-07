@@ -1,10 +1,7 @@
 import { getEventoDoProdutor } from "@/lib/producer";
 import { createClient } from "@/lib/supabase/server";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
-
-const statusVariant = { valido: "success", usado: "secondary", cancelado: "destructive" } as const;
+import { IngressoRow } from "../ingresso-row";
 
 export default async function IngressosPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,7 +11,7 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
   const { data: tickets } = await supabase
     .from("tickets")
     .select(
-      "id, codigo_qr, status, titular_nome, intransferivel, profile_id, usado_em, criado_em, impresso_count, ticket_types(nome), orders(comprador_nome, comprador_email)",
+      "id, codigo_qr, status, titular_nome, titular_cpf, intransferivel, profile_id, usado_em, criado_em, impresso_count, impresso_em, ultima_impressao_em, ticket_types(nome), orders(comprador_nome, comprador_email, comprador_telefone, comprador_cpf, canal, forma_pagamento_pdv, criado_em, pdv_terminals(nome_identificacao))",
     )
     .eq("event_id", id)
     .eq("is_cortesia", false)
@@ -32,32 +29,9 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {tickets?.map((t) => {
-          const order = t.orders as unknown as { comprador_nome: string; comprador_email: string } | null;
-          const tipo = t.ticket_types as unknown as { nome: string } | null;
-          return (
-            <div key={t.id} className="flex flex-col gap-2 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5 text-sm">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="break-words font-medium text-white">
-                    {t.titular_nome ?? order?.comprador_nome ?? "Comprador"}{" "}
-                    {t.intransferivel && <Badge variant="warning">intransferível</Badge>}
-                    {t.profile_id && <Badge variant="success">conta vinculada</Badge>}
-                    {t.impresso_count > 1 && <Badge variant="destructive">impresso {t.impresso_count}x</Badge>}
-                  </p>
-                  <p className="break-words text-[#93a0b8]">
-                    {tipo?.nome} — {order?.comprador_email ?? "—"}
-                  </p>
-                  <p className="break-all text-xs text-[#5d6b84]">{t.codigo_qr}</p>
-                </div>
-                <div className="flex-none text-right">
-                  <Badge variant={statusVariant[t.status as keyof typeof statusVariant]}>{t.status}</Badge>
-                  {t.usado_em && <p className="mt-1 text-xs text-[#5d6b84]">{formatDate(t.usado_em)}</p>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {tickets?.map((t) => (
+          <IngressoRow key={t.id} ticket={t} />
+        ))}
         {(!tickets || tickets.length === 0) && <p className="text-[#93a0b8]">Nenhum ingresso emitido ainda.</p>}
       </div>
     </div>

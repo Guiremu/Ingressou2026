@@ -6,23 +6,23 @@ import { atualizarStatusEvento } from "./actions";
 import { Button } from "@/components/ui/button";
 import type { EventStatus } from "@/types/database";
 
-export function StatusActions({ eventId, status }: { eventId: string; status: EventStatus }) {
+export function EncerrarVendasButton({ eventId, status }: { eventId: string; status: EventStatus }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  function change(next: EventStatus) {
+  if (status !== "publicado") return null;
+
+  function encerrar() {
     startTransition(async () => {
-      const result = await atualizarStatusEvento(eventId, next);
+      const result = await atualizarStatusEvento(eventId, "encerrado");
       if (result.error) alert(result.error);
       router.refresh();
     });
   }
 
-  if (status !== "rascunho") return null;
-
   return (
-    <Button disabled={pending} onClick={() => change("publicado")}>
-      Publicar evento
+    <Button disabled={pending} variant="outline" size="sm" onClick={encerrar}>
+      Encerrar vendas
     </Button>
   );
 }
