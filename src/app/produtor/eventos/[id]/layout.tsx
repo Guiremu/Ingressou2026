@@ -18,18 +18,20 @@ export default async function EventoLayout({
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#263041] bg-[#0f141d] px-5 py-4">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-[var(--font-sora)] text-[19px] font-bold tracking-tight text-white">
+            <h1 className="min-w-0 break-words font-[var(--font-sora)] text-[19px] font-bold tracking-tight text-white">
               {event.titulo}
             </h1>
-            <Badge variant="secondary">{event.status}</Badge>
+            <Badge variant="secondary" className="flex-none">
+              {event.status}
+            </Badge>
           </div>
           <p className="text-xs text-[#93a0b8]">
             {formatDate(event.data_inicio)} · {event.cidade}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {event.status === "publicado" && (
             <Link
               href={`/${producer.slug}/${event.slug}`}

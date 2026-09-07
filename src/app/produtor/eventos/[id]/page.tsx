@@ -25,7 +25,7 @@ export default async function VisaoGeralPage({ params }: { params: Promise<{ id:
 
   return (
     <>
-      <div className="flex flex-wrap overflow-hidden rounded-2xl border border-[#263041] bg-[#121722]">
+      <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#263041] bg-[#121722] sm:grid-cols-3">
         {[
           { label: "Ingressos vendidos", valor: `${vendidos} / ${capacidade || "—"}` },
           { label: "Receita em ingressos", valor: formatCurrency(receita), cor: "text-[var(--accent)]" },
@@ -33,11 +33,10 @@ export default async function VisaoGeralPage({ params }: { params: Promise<{ id:
         ].map((stat, i, arr) => (
           <div
             key={stat.label}
-            className={`flex flex-1 flex-col gap-1 p-3.5 ${i < arr.length - 1 ? "border-r border-[#263041]" : ""}`}
-            style={{ minWidth: 160 }}
+            className={`flex min-w-0 flex-col gap-1 p-3.5 ${i < arr.length - 1 ? "border-b border-[#263041] sm:border-b-0 sm:border-r" : ""}`}
           >
             <span className="text-xs text-[#93a0b8]">{stat.label}</span>
-            <span className={`font-[var(--font-sora)] text-[21px] font-bold ${stat.cor ?? "text-white"}`}>
+            <span className={`truncate font-[var(--font-sora)] text-[21px] font-bold ${stat.cor ?? "text-white"}`}>
               {stat.valor}
             </span>
           </div>

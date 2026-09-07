@@ -29,13 +29,13 @@ export default async function ColaboradoresPage({ params }: { params: Promise<{ 
             key={v.id}
             className="flex flex-wrap items-center justify-between gap-2 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5"
           >
-            <div>
-              <p className="font-medium text-white">{v.nome_identificacao}</p>
+            <div className="min-w-0">
+              <p className="break-words font-medium text-white">{v.nome_identificacao}</p>
               <p className="break-all text-xs text-[#93a0b8]">
                 {siteUrl}/validar/{event.slug}?token={v.token_publico}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-none items-center gap-2">
               <Badge variant={v.ativo ? "success" : "secondary"}>{v.ativo ? "Ativo" : "Inativo"}</Badge>
               <ValidatorToggle id={v.id} ativo={v.ativo} />
             </div>

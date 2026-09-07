@@ -35,7 +35,7 @@ export function CortesiaForm({ eventId }: { eventId: string }) {
         </Label>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor="cortesia_titular_nome">Nome do titular {intransferivel && "(obrigatório)"}</Label>
           <Input id="cortesia_titular_nome" name="titular_nome" required={intransferivel} />

@@ -32,7 +32,7 @@ export function EventEditForm({ event }: { event: EventRow }) {
         <Label htmlFor="descricao">Descrição</Label>
         <Textarea id="descricao" name="descricao" defaultValue={event.descricao ?? ""} />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="categoria">Categoria</Label>
           <Select id="categoria" name="categoria" defaultValue={event.categoria ?? ""}>
@@ -66,7 +66,7 @@ export function EventEditForm({ event }: { event: EventRow }) {
         <Label htmlFor="endereco">Endereço</Label>
         <Input id="endereco" name="endereco" defaultValue={event.endereco ?? ""} />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="data_inicio">Data/hora de início</Label>
           <Input

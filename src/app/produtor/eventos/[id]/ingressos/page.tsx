@@ -39,18 +39,18 @@ export default async function IngressosPage({ params }: { params: Promise<{ id: 
           return (
             <div key={t.id} className="flex flex-col gap-2 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium text-white">
+                <div className="min-w-0">
+                  <p className="break-words font-medium text-white">
                     {t.titular_nome ?? order?.comprador_nome ?? "Comprador"}{" "}
                     {t.intransferivel && <Badge variant="warning">intransferível</Badge>}
                     {t.profile_id && <Badge variant="success">conta vinculada</Badge>}
                   </p>
-                  <p className="text-[#93a0b8]">
+                  <p className="break-words text-[#93a0b8]">
                     {tipo?.nome} — {order?.comprador_email ?? "—"}
                   </p>
-                  <p className="text-xs text-[#5d6b84]">{t.codigo_qr}</p>
+                  <p className="break-all text-xs text-[#5d6b84]">{t.codigo_qr}</p>
                 </div>
-                <div className="text-right">
+                <div className="flex-none text-right">
                   <Badge variant={statusVariant[t.status as keyof typeof statusVariant]}>{t.status}</Badge>
                   {t.usado_em && <p className="mt-1 text-xs text-[#5d6b84]">{formatDate(t.usado_em)}</p>}
                 </div>

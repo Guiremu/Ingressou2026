@@ -37,15 +37,18 @@ export default async function EventosPage() {
           <Link
             key={event.id}
             href={`/produtor/eventos/${event.id}`}
-            className="flex items-center justify-between gap-3 rounded-2xl border border-[#263041] bg-[#121722] p-4 transition-colors hover:border-[#3d4a63]"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#263041] bg-[#121722] p-4 transition-colors hover:border-[#3d4a63]"
           >
-            <div>
-              <p className="font-semibold text-white">{event.titulo}</p>
-              <p className="text-sm text-[#93a0b8]">
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-white">{event.titulo}</p>
+              <p className="truncate text-sm text-[#93a0b8]">
                 {formatDate(event.data_inicio)} — {event.cidade}
               </p>
             </div>
-            <Badge variant={eventStatusVariant[event.status as keyof typeof eventStatusVariant]}>
+            <Badge
+              className="flex-none"
+              variant={eventStatusVariant[event.status as keyof typeof eventStatusVariant]}
+            >
               {event.status}
             </Badge>
           </Link>

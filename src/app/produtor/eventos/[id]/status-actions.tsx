@@ -19,7 +19,7 @@ export function StatusActions({ eventId, status }: { eventId: string; status: Ev
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       {status === "rascunho" && (
         <Button disabled={pending} onClick={() => change("publicado")}>
           Publicar evento

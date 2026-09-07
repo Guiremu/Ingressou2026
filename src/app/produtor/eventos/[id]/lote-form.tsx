@@ -14,7 +14,7 @@ export function LoteForm({ eventId }: { eventId: string }) {
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-[14px] border border-dashed border-[#3d4a63] p-4">
       <input type="hidden" name="event_id" value={eventId} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor="lote_nome">Nome do lote</Label>
           <Input id="lote_nome" name="nome" placeholder="1º Lote Pista" required />
@@ -28,7 +28,7 @@ export function LoteForm({ eventId }: { eventId: string }) {
         <Label htmlFor="lote_descricao">Descrição (opcional)</Label>
         <Input id="lote_descricao" name="descricao" placeholder="Acesso à área de pista..." />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor="lote_qtd">Quantidade total</Label>
           <Input id="lote_qtd" name="quantidade_total" type="number" min="1" required />
@@ -38,7 +38,7 @@ export function LoteForm({ eventId }: { eventId: string }) {
           <Input id="lote_max" name="max_por_pedido" type="number" min="1" defaultValue={10} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor="lote_inicio">Início das vendas</Label>
           <Input id="lote_inicio" name="data_inicio_venda" type="datetime-local" />

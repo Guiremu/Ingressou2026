@@ -53,7 +53,7 @@ export function LoteRow({
         }}
         className="flex flex-col gap-3 rounded-[14px] border border-[#263041] bg-[#18202e] p-4"
       >
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
             <Label htmlFor={`nome-${lote.id}`}>Nome do lote</Label>
             <Input id={`nome-${lote.id}`} name="nome" defaultValue={lote.nome} required />
@@ -75,7 +75,7 @@ export function LoteRow({
           <Label htmlFor={`descricao-${lote.id}`}>Descrição (opcional)</Label>
           <Input id={`descricao-${lote.id}`} name="descricao" defaultValue={lote.descricao ?? ""} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
             <Label htmlFor={`qtd-${lote.id}`}>
               Quantidade total {lote.quantidade_vendida > 0 && `(mín. ${lote.quantidade_vendida}, já vendidos)`}
@@ -94,7 +94,7 @@ export function LoteRow({
             <Input id={`max-${lote.id}`} name="max_por_pedido" type="number" min="1" defaultValue={lote.max_por_pedido} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
             <Label htmlFor={`inicio-${lote.id}`}>Início das vendas</Label>
             <Input
@@ -129,14 +129,14 @@ export function LoteRow({
 
   return (
     <div className="flex flex-col gap-2.5 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="font-medium text-white">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="break-words font-medium text-white">
             {lote.nome} {!lote.ativo && <Badge variant="secondary">pausado</Badge>}
           </p>
           <p className="text-sm text-[#93a0b8]">{formatCurrency(Number(lote.preco))}</p>
         </div>
-        <p className="text-sm text-[#93a0b8]">
+        <p className="flex-none text-sm text-[#93a0b8]">
           {lote.quantidade_vendida} / {lote.quantidade_total} vendidos
         </p>
       </div>

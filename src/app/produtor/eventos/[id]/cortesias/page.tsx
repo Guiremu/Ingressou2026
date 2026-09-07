@@ -37,18 +37,21 @@ export default async function CortesiasPage({ params }: { params: Promise<{ id: 
           {lista.map((c) => (
             <div key={c.id} className="flex flex-col gap-2 rounded-[14px] border border-[#263041] bg-[#18202e] p-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium text-white">
+                <div className="min-w-0">
+                  <p className="break-words font-medium text-white">
                     {c.titular_nome ?? "Sem nome definido"}{" "}
                     {c.intransferivel && <Badge variant="warning">intransferível</Badge>}
                     {c.profile_id && <Badge variant="success">conta vinculada</Badge>}
                   </p>
-                  <p className="text-sm text-[#93a0b8]">
+                  <p className="break-words text-sm text-[#93a0b8]">
                     {motivoLabel[c.motivo_cortesia ?? "outro"]}
                     {c.titular_cpf && ` · CPF ${c.titular_cpf}`}
                   </p>
                 </div>
-                <Badge variant={c.status === "usado" ? "secondary" : c.status === "cancelado" ? "destructive" : "success"}>
+                <Badge
+                  className="flex-none"
+                  variant={c.status === "usado" ? "secondary" : c.status === "cancelado" ? "destructive" : "success"}
+                >
                   {c.status}
                 </Badge>
               </div>
