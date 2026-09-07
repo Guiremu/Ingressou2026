@@ -30,6 +30,13 @@ export default function NovoEventoPage() {
             <Label htmlFor="descricao">Descrição</Label>
             <Textarea id="descricao" name="descricao" />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="imagem">Foto de banner</Label>
+            <Input id="imagem" name="imagem" type="file" accept="image/*" required />
+            <p className="text-xs text-[var(--text-dim)]">
+              Obrigatória — aparece na vitrine e na página do evento.
+            </p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="categoria">Categoria</Label>

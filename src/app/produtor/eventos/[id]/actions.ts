@@ -68,7 +68,7 @@ export async function atualizarEvento(_prevState: FormState, formData: FormData)
   const eventId = String(formData.get("event_id") ?? "");
   const { producer } = await requireProducer();
   const admin = createAdminClient();
-  await assertOwnsEvent(admin, eventId, producer.id);
+  const eventoAtual = await assertOwnsEvent(admin, eventId, producer.id);
 
   const titulo = String(formData.get("titulo") ?? "").trim();
   const descricao = String(formData.get("descricao") ?? "").trim();
@@ -104,7 +104,13 @@ export async function atualizarEvento(_prevState: FormState, formData: FormData)
   };
 
   const imagem = formData.get("imagem");
-  if (imagem instanceof File && imagem.size > 0) {
+  const temNovaImagem = imagem instanceof File && imagem.size > 0;
+
+  if (!temNovaImagem && !eventoAtual.imagem_url) {
+    return { error: "A foto de banner do evento é obrigatória." };
+  }
+
+  if (temNovaImagem && imagem instanceof File) {
     const extensao = imagem.name.split(".").pop() || "jpg";
     const caminho = `${producer.id}/${eventId}-${Date.now()}.${extensao}`;
     const { error: uploadError } = await admin.storage

@@ -21,9 +21,14 @@ export async function criarEvento(_prevState: NovoEventoState, formData: FormDat
   const cidade = String(formData.get("cidade") ?? "").trim();
   const dataInicio = String(formData.get("data_inicio") ?? "");
   const dataFim = String(formData.get("data_fim") ?? "");
+  const imagem = formData.get("imagem");
 
   if (!titulo || !local || !cidade || !dataInicio) {
     return { error: "Preencha ao menos título, local, cidade e data de início." };
+  }
+
+  if (!(imagem instanceof File) || imagem.size === 0) {
+    return { error: "A foto de banner do evento é obrigatória." };
   }
 
   if (!CIDADES_ATENDIDAS.includes(cidade)) {
@@ -69,6 +74,20 @@ export async function criarEvento(_prevState: NovoEventoState, formData: FormDat
   if (error || !event) {
     return { error: "Não foi possível criar o evento: " + error?.message };
   }
+
+  const extensao = imagem.name.split(".").pop() || "jpg";
+  const caminho = `${producer.id}/${event.id}-${Date.now()}.${extensao}`;
+  const { error: uploadError } = await admin.storage
+    .from("event-images")
+    .upload(caminho, await imagem.arrayBuffer(), { contentType: imagem.type, upsert: true });
+
+  if (uploadError) {
+    await admin.from("events").delete().eq("id", event.id);
+    return { error: "Não foi possível enviar a foto de banner: " + uploadError.message };
+  }
+
+  const { data: publicUrl } = admin.storage.from("event-images").getPublicUrl(caminho);
+  await admin.from("events").update({ imagem_url: publicUrl.publicUrl }).eq("id", event.id);
 
   redirect(`/produtor/eventos/${event.id}`);
 }

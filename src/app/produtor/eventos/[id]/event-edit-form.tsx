@@ -89,8 +89,10 @@ export function EventEditForm({ event }: { event: EventRow }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={event.imagem_url} alt="" className="h-32 w-full rounded-lg object-cover" />
         )}
-        <Input id="imagem" name="imagem" type="file" accept="image/*" />
-        <p className="text-xs text-[var(--text-dim)]">Deixe em branco pra manter a imagem atual.</p>
+        <Input id="imagem" name="imagem" type="file" accept="image/*" required={!event.imagem_url} />
+        <p className="text-xs text-[var(--text-dim)]">
+          {event.imagem_url ? "Deixe em branco pra manter a imagem atual." : "Obrigatória — esse evento ainda não tem foto de banner."}
+        </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
