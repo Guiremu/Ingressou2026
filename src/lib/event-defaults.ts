@@ -1,3 +1,27 @@
+/** Cidades atendidas pela plataforma — lista fixa, pra manter o filtro da vitrine consistente. */
+export const CIDADES_ATENDIDAS = [
+  "Ariquemes, RO",
+  "Porto Velho, RO",
+  "Ji-Paraná, RO",
+  "Cacoal, RO",
+  "Vilhena, RO",
+  "Jaru, RO",
+  "Rolim de Moura, RO",
+  "Guajará-Mirim, RO",
+];
+
+/** Categorias de evento — lista fixa, pra manter o filtro da vitrine consistente. */
+export const CATEGORIAS_EVENTO = [
+  "Show",
+  "Festa",
+  "Festival",
+  "Teatro",
+  "Gastronomia",
+  "Esporte",
+  "Palestra",
+  "Outro",
+];
+
 /**
  * Texto padrão de política de reembolso, preenchido automaticamente em todo evento novo
  * (o produtor pode editar depois em "Editar evento") — assim ele não precisa escrever do

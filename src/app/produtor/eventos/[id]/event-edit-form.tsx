@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { POLITICA_REEMBOLSO_PADRAO } from "@/lib/event-defaults";
+import { Select } from "@/components/ui/select";
+import { POLITICA_REEMBOLSO_PADRAO, CATEGORIAS_EVENTO, CIDADES_ATENDIDAS } from "@/lib/event-defaults";
 import type { EventRow } from "@/types/database";
 
 const initialState: FormState = {};
@@ -43,11 +44,27 @@ export function EventEditForm({ event }: { event: EventRow }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="categoria">Categoria</Label>
-          <Input id="categoria" name="categoria" defaultValue={event.categoria ?? ""} placeholder="Show, Festa, Teatro..." />
+          <Select id="categoria" name="categoria" defaultValue={event.categoria ?? ""}>
+            <option value="">Selecione</option>
+            {CATEGORIAS_EVENTO.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="cidade">Cidade</Label>
-          <Input id="cidade" name="cidade" defaultValue={event.cidade ?? ""} required />
+          <Select id="cidade" name="cidade" required defaultValue={event.cidade ?? ""}>
+            <option value="" disabled>
+              Selecione
+            </option>
+            {CIDADES_ATENDIDAS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
         </div>
       </div>
       <div className="flex flex-col gap-1.5">

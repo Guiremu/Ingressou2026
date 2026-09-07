@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { requireProducer } from "@/lib/producer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
-import { POLITICA_REEMBOLSO_PADRAO } from "@/lib/event-defaults";
+import { POLITICA_REEMBOLSO_PADRAO, CATEGORIAS_EVENTO, CIDADES_ATENDIDAS } from "@/lib/event-defaults";
 
 export interface NovoEventoState {
   error?: string;
@@ -24,6 +24,13 @@ export async function criarEvento(_prevState: NovoEventoState, formData: FormDat
 
   if (!titulo || !local || !cidade || !dataInicio) {
     return { error: "Preencha ao menos título, local, cidade e data de início." };
+  }
+
+  if (!CIDADES_ATENDIDAS.includes(cidade)) {
+    return { error: "Selecione uma cidade válida da lista." };
+  }
+  if (categoria && !CATEGORIAS_EVENTO.includes(categoria)) {
+    return { error: "Selecione uma categoria válida da lista." };
   }
 
   const admin = createAdminClient();

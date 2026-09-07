@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { randomUUID } from "node:crypto";
 import { signTicket } from "@/lib/tickets";
 import { onlyDigits } from "@/lib/utils";
+import { CATEGORIAS_EVENTO, CIDADES_ATENDIDAS } from "@/lib/event-defaults";
 import type { EventStatus, MotivoCortesia } from "@/types/database";
 
 async function assertOwnsEvent(admin: ReturnType<typeof createAdminClient>, eventId: string, producerId: string) {
@@ -81,6 +82,13 @@ export async function atualizarEvento(_prevState: FormState, formData: FormData)
 
   if (!titulo || !local || !cidade || !dataInicio) {
     return { error: "Preencha ao menos título, local, cidade e data de início." };
+  }
+
+  if (!CIDADES_ATENDIDAS.includes(cidade)) {
+    return { error: "Selecione uma cidade válida da lista." };
+  }
+  if (categoria && !CATEGORIAS_EVENTO.includes(categoria)) {
+    return { error: "Selecione uma categoria válida da lista." };
   }
 
   const update: Record<string, unknown> = {
