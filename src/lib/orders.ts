@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { signTicket } from "@/lib/tickets";
 import type { Order, OrderItem } from "@/types/database";
@@ -30,21 +31,15 @@ export async function finalizePaidOrder(orderId: string, mpPaymentId: string | n
 
   for (const item of items ?? []) {
     for (let i = 0; i < item.quantidade; i++) {
-      const { data: ticket } = await admin
-        .from("tickets")
-        .insert({
-          order_id: orderId,
-          ticket_type_id: item.ticket_type_id,
-          event_id: order.event_id,
-          is_cortesia: false,
-        })
-        .select("id, codigo_qr")
-        .single();
-
-      if (ticket) {
-        const assinatura = signTicket(ticket.codigo_qr, order.event_id);
-        await admin.from("tickets").update({ assinatura_hmac: assinatura }).eq("id", ticket.id);
-      }
+      const codigoQr = randomUUID();
+      await admin.from("tickets").insert({
+        order_id: orderId,
+        ticket_type_id: item.ticket_type_id,
+        event_id: order.event_id,
+        is_cortesia: false,
+        codigo_qr: codigoQr,
+        assinatura_hmac: signTicket(codigoQr, order.event_id),
+      });
     }
   }
 

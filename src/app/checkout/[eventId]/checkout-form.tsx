@@ -144,13 +144,34 @@ export function CheckoutForm({
 
   if (state.status === "aprovado" && state.orderId) {
     return (
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center px-4 py-16">
-        <div className="w-full rounded-2xl border border-[var(--success)]/30 bg-[var(--success)]/10 p-6 text-center">
-          <p className="font-[var(--font-sora)] font-bold text-[var(--success)]">Pagamento aprovado!</p>
-          <p className="mt-2 text-sm text-[var(--text-muted-2)]">Seus ingressos já foram gerados.</p>
-          <Link href={`/pedido/${state.orderId}`} className="mt-4 inline-block font-medium text-[var(--accent)] underline">
-            Ver meus ingressos
-          </Link>
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-16">
+        <div className="w-full overflow-hidden rounded-[24px] border border-[var(--border)] bg-[#0e0e16]">
+          <div className="flex flex-col items-center gap-3 bg-[var(--success)]/10 px-6 py-9 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--success)] text-2xl font-extrabold text-[#062a1c]">
+              ✓
+            </div>
+            <div>
+              <p className="font-[var(--font-sora)] text-xl font-extrabold text-white">Pagamento aprovado!</p>
+              <p className="mt-1.5 text-sm text-[var(--text-muted-2)]">{eventTitulo}</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2.5 p-5">
+            <p className="text-center text-sm text-[var(--text-muted-2)]">
+              Seus ingressos já foram gerados e estão na sua conta.
+            </p>
+            <Link
+              href="/meus-ingressos"
+              className="mt-1.5 flex items-center justify-center rounded-[14px] bg-[var(--accent)] px-4 py-3 text-sm font-bold text-[var(--accent-foreground)]"
+            >
+              Ver meus ingressos
+            </Link>
+            <Link
+              href={`/pedido/${state.orderId}`}
+              className="flex items-center justify-center rounded-[14px] border border-[var(--border-2)] px-4 py-3 text-sm font-semibold text-white"
+            >
+              Ver detalhes do pedido
+            </Link>
+          </div>
         </div>
       </main>
     );
