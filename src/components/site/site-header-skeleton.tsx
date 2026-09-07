@@ -7,7 +7,7 @@ import Link from "next/link";
 export function SiteHeaderSkeleton() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[#07070b]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="flex flex-wrap items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="h-[22px] w-[22px] rounded-[7px] bg-[var(--accent)]" />
@@ -15,7 +15,7 @@ export function SiteHeaderSkeleton() {
               ingressou
             </span>
           </Link>
-          <nav className="flex gap-5 text-sm text-[var(--text-muted-2)]">
+          <nav className="hidden gap-5 text-sm text-[var(--text-muted-2)] md:flex">
             <Link href="/" className="font-semibold text-white">
               Eventos
             </Link>
@@ -27,7 +27,12 @@ export function SiteHeaderSkeleton() {
             </Link>
           </nav>
         </div>
-        <div className="flex items-center gap-3.5">
+        <div className="flex h-9 w-9 flex-col items-center justify-center gap-[5px] md:hidden">
+          <span className="h-[2px] w-5 bg-[var(--surface-4)]" />
+          <span className="h-[2px] w-5 bg-[var(--surface-4)]" />
+          <span className="h-[2px] w-5 bg-[var(--surface-4)]" />
+        </div>
+        <div className="hidden items-center gap-3.5 md:flex">
           <div className="h-4 w-14 animate-pulse rounded bg-[var(--surface-4)]" />
           <div className="h-4 w-20 animate-pulse rounded bg-[var(--surface-4)]" />
         </div>
