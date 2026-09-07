@@ -79,7 +79,7 @@ export default async function ProducerPage({
             )}
           </div>
 
-          <div className="flex flex-wrap items-end justify-between gap-4 px-5 pb-5">
+          <div className="flex flex-wrap items-end justify-between gap-4 px-5 pb-5 pt-4">
             <div className="flex items-end gap-4">
               {producer.logo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
