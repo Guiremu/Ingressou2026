@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { onlyDigits } from "@/lib/utils";
+import { onlyDigits, isValidCpf } from "@/lib/utils";
 
 export interface TransferState {
   error?: string;
@@ -21,8 +21,8 @@ export async function transferirIngressoAutoatendimento(
   const codigoQr = String(formData.get("codigo_qr") ?? "");
   const cpfDestino = onlyDigits(String(formData.get("cpf") ?? ""));
 
-  if (cpfDestino.length !== 11) {
-    return { error: "Informe um CPF válido (11 dígitos)." };
+  if (!isValidCpf(cpfDestino)) {
+    return { error: "Informe um CPF válido." };
   }
 
   const supabase = await createClient();

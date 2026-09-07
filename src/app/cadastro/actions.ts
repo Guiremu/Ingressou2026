@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { onlyDigits } from "@/lib/utils";
+import { onlyDigits, isValidCpf } from "@/lib/utils";
 
 export interface SignupState {
   error?: string;
@@ -16,8 +16,12 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
-  if (!nome || cpf.length !== 11 || !email || password.length < 6) {
-    return { error: "Confira nome, CPF (11 dígitos), e-mail e senha (mínimo 6 caracteres)." };
+  if (!nome || !email || password.length < 6) {
+    return { error: "Confira nome, e-mail e senha (mínimo 6 caracteres)." };
+  }
+
+  if (!isValidCpf(cpf)) {
+    return { error: "Informe um CPF válido." };
   }
 
   const admin = createAdminClient();

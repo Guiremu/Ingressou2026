@@ -5,6 +5,7 @@ import Link from "next/link";
 import { gerarCortesia, type FormState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
@@ -42,7 +43,7 @@ export function CortesiaForm({ eventId }: { eventId: string }) {
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="cortesia_titular_cpf">CPF do titular {intransferivel && "(obrigatório)"}</Label>
-          <Input id="cortesia_titular_cpf" name="titular_cpf" inputMode="numeric" required={intransferivel} />
+          <MaskedInput mask="cpf" id="cortesia_titular_cpf" name="titular_cpf" required={intransferivel} />
         </div>
       </div>
       <p className="text-xs text-[#5d6b84]">

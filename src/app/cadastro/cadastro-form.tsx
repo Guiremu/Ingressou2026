@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signup, type SignupState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Label } from "@/components/ui/label";
 
 const initialState: SignupState = {};
@@ -21,11 +22,11 @@ export function CadastroForm() {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="cpf">CPF</Label>
-          <Input id="cpf" name="cpf" required inputMode="numeric" placeholder="000.000.000-00" />
+          <MaskedInput mask="cpf" id="cpf" name="cpf" required placeholder="000.000.000-00" />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="telefone">Telefone</Label>
-          <Input id="telefone" name="telefone" inputMode="tel" placeholder="(00) 00000-0000" />
+          <MaskedInput mask="telefone" id="telefone" name="telefone" placeholder="(00) 00000-0000" />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">E-mail</Label>

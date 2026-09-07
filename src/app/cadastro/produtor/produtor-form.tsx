@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signupProdutor, type ProdutorSignupState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
@@ -37,7 +38,7 @@ export function ProdutorForm() {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cpf">Seu CPF</Label>
-            <Input id="cpf" name="cpf" required inputMode="numeric" placeholder="000.000.000-00" />
+            <MaskedInput mask="cpf" id="cpf" name="cpf" required placeholder="000.000.000-00" />
             <p className="text-xs text-[var(--text-muted)]">
               Sempre obrigatório: é o CPF do responsável legal pela conta.
             </p>
@@ -47,7 +48,7 @@ export function ProdutorForm() {
         {tipoPessoa === "juridica" && (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cnpj">CNPJ</Label>
-            <Input id="cnpj" name="cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" />
+            <MaskedInput mask="cnpj" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" />
           </div>
         )}
 
@@ -64,7 +65,7 @@ export function ProdutorForm() {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="telefone">Telefone</Label>
-          <Input id="telefone" name="telefone" inputMode="tel" placeholder="(00) 00000-0000" />
+          <MaskedInput mask="telefone" id="telefone" name="telefone" placeholder="(00) 00000-0000" />
         </div>
 
         <div className="flex flex-col gap-1.5">

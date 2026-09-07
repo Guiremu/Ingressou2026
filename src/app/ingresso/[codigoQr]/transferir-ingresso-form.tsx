@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { transferirIngressoAutoatendimento, type TransferState } from "./actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 
 const initialState: TransferState = {};
 
@@ -38,7 +38,7 @@ export function TransferirIngressoForm({ codigoQr }: { codigoQr: string }) {
       <p className="text-xs text-[var(--text-muted-2)]">
         Só é possível transferir para uma conta já cadastrada na Ingressou. Informe o CPF dela.
       </p>
-      <Input name="cpf" placeholder="CPF da conta de destino" inputMode="numeric" maxLength={14} />
+      <MaskedInput mask="cpf" name="cpf" placeholder="CPF da conta de destino" />
       {state.error && <p className="text-xs text-[var(--error)]">{state.error}</p>}
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={pending} className="flex-1">

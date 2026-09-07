@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { transferirIngresso, type FormState } from "./actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 
 const initialState: FormState = {};
 
@@ -13,7 +13,7 @@ export function TransferirForm({ ticketId }: { ticketId: string }) {
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="ticket_id" value={ticketId} />
-      <Input name="cpf" placeholder="CPF da conta" inputMode="numeric" className="h-8 w-36 text-xs" />
+      <MaskedInput mask="cpf" name="cpf" placeholder="CPF da conta" className="h-8 w-36 text-xs" />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "Vinculando..." : "Vincular por CPF"}
       </Button>

@@ -4,8 +4,10 @@ import { useActionState } from "react";
 import { atualizarPerfil, type PerfilState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MaskedInput } from "@/components/ui/masked-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCpf } from "@/lib/utils";
 
 const initialState: PerfilState = {};
 
@@ -35,7 +37,7 @@ export function PerfilForm({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="telefone">Telefone</Label>
-            <Input id="telefone" name="telefone" defaultValue={telefone} inputMode="tel" />
+            <MaskedInput mask="telefone" id="telefone" name="telefone" defaultValue={telefone} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>E-mail</Label>
@@ -43,7 +45,7 @@ export function PerfilForm({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>CPF</Label>
-            <Input value={cpf} disabled />
+            <Input value={formatCpf(cpf)} disabled />
           </div>
           {state.error && <p className="text-sm text-[var(--error)]">{state.error}</p>}
           {state.success && <p className="text-sm text-[var(--success)]">{state.success}</p>}

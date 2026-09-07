@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { onlyDigits, slugify } from "@/lib/utils";
+import { onlyDigits, slugify, isValidCpf, isValidCnpj } from "@/lib/utils";
 import { RESERVED_SLUGS } from "@/types/database";
 
 export interface ProdutorSignupState {
@@ -24,12 +24,16 @@ export async function signupProdutor(
   const razaoSocial = String(formData.get("razao_social") ?? "").trim();
   const nomeFantasia = String(formData.get("nome_fantasia") ?? "").trim();
 
-  if (!nome || cpf.length !== 11 || !email || password.length < 6 || !razaoSocial) {
-    return { error: "Confira nome, CPF (11 dígitos), e-mail, senha (mínimo 6 caracteres) e razão social." };
+  if (!nome || !email || password.length < 6 || !razaoSocial) {
+    return { error: "Confira nome, e-mail, senha (mínimo 6 caracteres) e razão social." };
   }
 
-  if (tipoPessoa === "juridica" && cnpj.length !== 14) {
-    return { error: "Informe um CNPJ válido (14 dígitos) para pessoa jurídica." };
+  if (!isValidCpf(cpf)) {
+    return { error: "Informe um CPF válido." };
+  }
+
+  if (tipoPessoa === "juridica" && !isValidCnpj(cnpj)) {
+    return { error: "Informe um CNPJ válido para pessoa jurídica." };
   }
 
   const baseSlug = slugify(nomeFantasia || razaoSocial);

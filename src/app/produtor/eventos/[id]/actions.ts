@@ -5,7 +5,7 @@ import { requireProducer } from "@/lib/producer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { randomUUID } from "node:crypto";
 import { signTicket } from "@/lib/tickets";
-import { onlyDigits } from "@/lib/utils";
+import { onlyDigits, isValidCpf } from "@/lib/utils";
 import { CATEGORIAS_EVENTO, CIDADES_ATENDIDAS } from "@/lib/event-defaults";
 import type { EventStatus, MotivoCortesia } from "@/types/database";
 
@@ -314,8 +314,11 @@ export async function gerarCortesia(_prevState: FormState, formData: FormData): 
   const titularCpf = onlyDigits(String(formData.get("titular_cpf") ?? ""));
   const intransferivel = String(formData.get("intransferivel") ?? "") === "1";
 
-  if (intransferivel && (!titularNome || titularCpf.length !== 11)) {
-    return { error: "Cortesia intransferível exige nome e CPF (11 dígitos) do titular." };
+  if (intransferivel && (!titularNome || !isValidCpf(titularCpf))) {
+    return { error: "Cortesia intransferível exige nome e CPF válido do titular." };
+  }
+  if (titularCpf && !isValidCpf(titularCpf)) {
+    return { error: "Informe um CPF válido para o titular (ou deixe em branco)." };
   }
 
   let { data: cortesiaLote } = await admin
@@ -346,7 +349,7 @@ export async function gerarCortesia(_prevState: FormState, formData: FormData): 
   // (aparece direto em "Meus ingressos" da pessoa). Sem conta, fica só na listagem —
   // o produtor pode vincular depois manualmente.
   let vinculadoProfileId: string | null = null;
-  if (titularCpf.length === 11) {
+  if (isValidCpf(titularCpf)) {
     const { data: perfilEncontrado } = await admin.from("profiles").select("id").eq("cpf", titularCpf).maybeSingle();
     vinculadoProfileId = perfilEncontrado?.id ?? null;
   }
@@ -384,7 +387,7 @@ export async function transferirIngresso(_prevState: FormState, formData: FormDa
   const { producer } = await requireProducer();
   const admin = createAdminClient();
 
-  if (cpf.length !== 11) return { error: "Informe um CPF válido (11 dígitos)." };
+  if (!isValidCpf(cpf)) return { error: "Informe um CPF válido." };
 
   const { data: ticket } = await admin.from("tickets").select("*, events!inner(producer_id)").eq("id", ticketId).single();
   const producerIdDoTicket = (ticket?.events as unknown as { producer_id: string } | null)?.producer_id;
