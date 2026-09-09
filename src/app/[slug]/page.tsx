@@ -86,10 +86,10 @@ export default async function ProducerPage({
                 <img
                   src={producer.logo_url}
                   alt={nome}
-                  className="-mt-[38px] h-[88px] w-[88px] flex-none rounded-full border-[3px] border-[#0e0e16] object-cover shadow-lg shadow-black/40"
+                  className="-mt-[60px] h-[88px] w-[88px] flex-none rounded-full border-[3px] border-[#0e0e16] object-cover shadow-lg shadow-black/40"
                 />
               ) : (
-                <div className="-mt-[38px] flex h-[88px] w-[88px] flex-none items-center justify-center rounded-full border-[3px] border-[#0e0e16] bg-[linear-gradient(135deg,#7C5CFF_0%,#FF4D8D_100%)] font-[var(--font-sora)] text-[30px] font-extrabold text-white shadow-lg shadow-black/40">
+                <div className="-mt-[60px] flex h-[88px] w-[88px] flex-none items-center justify-center rounded-full border-[3px] border-[#0e0e16] bg-[linear-gradient(135deg,#7C5CFF_0%,#FF4D8D_100%)] font-[var(--font-sora)] text-[30px] font-extrabold text-white shadow-lg shadow-black/40">
                   {nome.charAt(0).toUpperCase()}
                 </div>
               )}
